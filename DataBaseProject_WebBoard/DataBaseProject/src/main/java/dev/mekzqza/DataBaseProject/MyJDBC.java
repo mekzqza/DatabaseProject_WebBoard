@@ -15,7 +15,7 @@ public  class MyJDBC {
 
     public static void main(String[] args) {
         MyJDBC myJDBC =new MyJDBC();
-
+        myJDBC.addNewUser("test","test522");
 
    }
 
@@ -48,7 +48,7 @@ public  class MyJDBC {
     ///เพิ่ม User ใหม่
     public void addNewUser(String name ,String password) {
 
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+        String sql = "INSERT INTO user (username, password) VALUES (?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, dbPassword);
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 

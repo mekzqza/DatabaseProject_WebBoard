@@ -15,7 +15,7 @@ public  class MyJDBC {
 
     public static void main(String[] args) {
         MyJDBC myJDBC =new MyJDBC();
-        myJDBC.addNewUser("test","test522");
+        myJDBC.addNewUser("naruto","okage");
 
    }
 

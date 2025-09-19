@@ -11,7 +11,7 @@ public class MyJDBC {
 //    public static void main(String[] args) {
 //       databaseCommands("SELECT * FROM user");
 //    }
-
+//asdasd
 
     public void databaseCommands(String command){
 

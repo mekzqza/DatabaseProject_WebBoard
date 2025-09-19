@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;  // เปลี่ยนเป็น Controller
-import org.springframework.web.bind.annotation.ResponseBody;
+//import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
 
@@ -14,8 +14,7 @@ import java.util.Map;
 
 
 class WebboadProjectApplication {
-
-
+	
 	@GetMapping("/greeting")
 	public String getGreeting(Model model) {
 
@@ -55,9 +54,10 @@ class WebboadProjectApplication {
 
 
 	//RUNApp
-//	public static void main(String[] args) {
-//		SpringApplication.run(WebboadProjectApplication.class, args);
-//	}
+	public static void main(String[] args) {
+		SpringApplication.run(WebboadProjectApplication.class, args);
+	}
+	
 
 
 }

@@ -13,11 +13,6 @@ public  class MyJDBC {
     String dbPassword = "mek0934396759";  // รหัสผ่านฐานข้อมูล
 
 
-//    public static void main(String[] args) {
-//        MyJDBC myJDBC =new MyJDBC();
-//        myJDBC.addNewUser("naruto","okage");
-//
-//   }
 
 
     public Map<String ,String> sQlSeLect(String command){
@@ -74,7 +69,6 @@ public  class MyJDBC {
     }
 
 
-
     public void databaseTestCommands(String command){
 
         try{
@@ -97,5 +91,10 @@ public  class MyJDBC {
     }
 
 
+//    public static void main(String[] args) {
+//        MyJDBC myJDBC =new MyJDBC();
+//        myJDBC.addNewUser("naruto","okage");
+//
+//   }
 
 }

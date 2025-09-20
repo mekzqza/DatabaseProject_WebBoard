@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ดึงข้อมูลจาก Backend</title>
+</head>
+<body>
+<h2>ข้อมูลจาก Backend:</h2>
+<p id="output">รอข้อมูล...</p>
+
+<button onclick="loadData()">กดเพื่อดึงข้อมูล</button>
+
+<script>
+    function loadData() {
+        fetch('/api/hello')   // เรียก API ของ Spring Boot
+            .then(response => response.json()) // แปลงเป็น JSON
+            .then(data => {
+                document.getElementById("output").innerText = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+</body>
+</html>

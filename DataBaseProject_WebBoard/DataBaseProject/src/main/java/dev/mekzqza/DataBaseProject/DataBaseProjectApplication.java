@@ -5,8 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;  // เปลี่ยนเป็น Controller
+import org.springframework.web.bind.annotation.RestController;
 //import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
@@ -50,6 +52,18 @@ class WebboadProjectApplication {
 		model.addAttribute("message","mekzqza");
 		return "hello";
 	}
+
+
+
+    @RestController
+    public class ApiController {
+        @GetMapping("/api/hello")
+        public Map<String, String> hello() {
+            Map<String, String> data = new HashMap<>();
+            data.put("message", "สวัสดีจาก Backend (Java)");
+            return data; // จะส่งกลับเป็น JSON { "message": "สวัสดีจาก Backend (Java)" }
+        }
+    }
 
 
 

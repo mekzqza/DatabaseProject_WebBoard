@@ -10,6 +10,7 @@
 
 <button onclick="loadData()">กดเพื่อดึงข้อมูล</button>
 
+
 <script>
     function loadData() {
         fetch('/api/hello')   // เรียก API ของ Spring Boot
@@ -20,5 +21,7 @@
             .catch(error => console.error('Error:', error));
     }
 </script>
+
+
 </body>
 </html>

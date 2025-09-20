@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;  // เปลี่ยนเป็น Controller
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 //import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -37,31 +39,31 @@ class WebboadProjectApplication {
 	}
 
 
-/*
-	@GetMapping("/greeting/Test")
-	@ResponseBody
-	public String Test() {
-
-		return "hello Test";
-	}
-*/
-
-
-    @GetMapping("/hello")
-	public String hello(Model model){
-		model.addAttribute("message","mekzqza");
-		return "hello";
-	}
+//    @RestController
+//    public class ApiController {
+//        @GetMapping("/api/hello")
+//        public Map<String, String> hello() {
+//            Map<String, String> data = new HashMap<>();
+//            data.put("message", "สวัสดีจาก Backend (Java)");
+//            return data; // จะส่งกลับเป็น JSON { "message": "สวัสดีจาก Backend (Java)" }
+//        }
+//    }
 
 
-
-    @RestController
+    @RestController  // ใช้ @RestController สำหรับการรับ POST request ในรูปแบบ JSON
     public class ApiController {
-        @GetMapping("/api/hello")
-        public Map<String, String> hello() {
-            Map<String, String> data = new HashMap<>();
-            data.put("message", "สวัสดีจาก Backend (Java)");
-            return data; // จะส่งกลับเป็น JSON { "message": "สวัสดีจาก Backend (Java)" }
+
+        @PostMapping("/api/submit")
+        public void submitData(@RequestBody Map<String, String> data) {
+            // รับข้อมูลจาก Frontend
+            String username = data.get("username");
+            String password = data.get("password");
+
+            // ประมวลผลข้อมูล (ตัวอย่างนี้แค่แสดงผลใน console)
+            System.out.println("Received Username: " + username);
+            System.out.println("Received Password: " + password);
+
+            // คุณสามารถบันทึกข้อมูลลงฐานข้อมูลได้ที่นี่
         }
     }
 

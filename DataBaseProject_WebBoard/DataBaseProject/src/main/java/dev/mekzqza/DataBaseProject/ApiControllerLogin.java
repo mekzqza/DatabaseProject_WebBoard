@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@CrossOrigin(origins = "http://localhost:3000") // อนุญาต React ที่พอร์ต 3000
+
 @RestController
 public class ApiControllerLogin {
 
@@ -20,27 +22,22 @@ public class ApiControllerLogin {
 
 
     @PostMapping("/api/submit")
-    public String submitData(@RequestBody Map<String, String> data) {
-        // รับข้อมูลจาก Frontend
+    public Map<String,Object> submitData(@RequestBody Map<String,String> data){
         String username = data.get("username");
         String password = data.get("password");
-
-        // ประมวลผลข้อมูล (ตัวอย่างนี้แค่แสดงผลใน console)
-        System.out.println("Received Username: " + username);
-        System.out.println("Received Password: " + password);
-
-        // คุณสามารถบันทึกข้อมูลลงฐานข้อมูลได้ที่นี่
-        return "success";
+        System.out.println(">>> Received Username: " + username);
+        System.out.println(">>> Received Password: " + password);
+        return Map.of("status","success","username",username);
     }
 
 
 
     @RestController
     public class MyController {
-        @CrossOrigin(origins = "http://localhost:3000") // อนุญาต React เข้าถึง
         @GetMapping("/api/message")
         public Map<String, String> getMessage() {
-            return Map.of("message", "Hello from Java Backend 👋 ///  mapping:");
+            return Map.of("message", "Hello from Java Backend 👋 " +
+                    "///  mapping at:http://localhost:3000/api/message\"");
         }
     }
 

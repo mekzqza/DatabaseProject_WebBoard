@@ -27,6 +27,16 @@ public class ApiControllerLogin {
         String password = data.get("password");
         System.out.println(">>> Received Username: " + username);
         System.out.println(">>> Received Password: " + password);
+
+        // สามารถใช้ Class MYJDBC เพื่อเพิ่ม user,password Database Table Userได้เลย
+
+        MyJDBC myJDBC = new MyJDBC();
+        //เพิ่ม User ใหม่ได้เลย แต่ตอนนี้จะทำเป็น เพิ่มใน database + Cache เพื่อใช้ใน ในการคำนวนใน server ขณะนั้นเพื่อเป็นการ optimize
+        myJDBC.addNewUser(username,username);
+
+
+
+        //Return ค่ากับออกไปหน้า Rract
         return Map.of("status","success","username",username);
     }
 

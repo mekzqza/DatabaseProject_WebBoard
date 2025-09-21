@@ -1,8 +1,6 @@
 package dev.mekzqza.DataBaseProject;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -33,6 +31,17 @@ public class ApiControllerLogin {
 
         // คุณสามารถบันทึกข้อมูลลงฐานข้อมูลได้ที่นี่
         return "success";
+    }
+
+
+
+    @RestController
+    public class MyController {
+        @CrossOrigin(origins = "http://localhost:3000") // อนุญาต React เข้าถึง
+        @GetMapping("/api/message")
+        public Map<String, String> getMessage() {
+            return Map.of("message", "Hello from Java Backend 👋 ///  mapping:");
+        }
     }
 
 

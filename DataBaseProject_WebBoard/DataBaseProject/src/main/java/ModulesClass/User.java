@@ -1,13 +1,13 @@
 package ModulesClass;
 
-public class Users {
+public class User {
     private String id;
     private String name;
     private String password;
     private String email;
 
     // Constructor
-    public Users(String id, String name, String password, String email) {
+    public User(String id, String name, String password, String email) {
         this.id = id;
         this.name = name;
         this.password = password;

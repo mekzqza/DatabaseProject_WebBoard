@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:3000") // อนุญาต React ที่พอร์ต 3000
+@CrossOrigin(origins = "http://localhost:3000") // อนุญาต React ที่พอร์ต 3000 --->URL จากfornt  "http://localhost:3000"
 
 @RestController
 public class ApiControllerLogin {

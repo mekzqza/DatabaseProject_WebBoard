@@ -1,4 +1,4 @@
-const API ="http://localhost:8080";
+const API ="http://localhost:8080";  //---->URL จากBackEND
 
 export async function sendLogin({ username, password }) {
     const res = await fetch(`${API}/api/submit`, {

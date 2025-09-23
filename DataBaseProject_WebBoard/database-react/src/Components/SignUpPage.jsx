@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for page redirection
-import './ CssStore/singup.css'
+import { useNavigate } from 'react-router-dom';
+import './ CssStore/singup.css';
+
 function SignUpPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');  // State for confirm password
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);  // Loading state
-    const [error, setError] = useState('');  // Error message
-    const navigate = useNavigate();  // Use navigate to redirect
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
 
-    // Sign-up function
     const handleSignUp = async (e) => {
         e.preventDefault();
-        setError('');  // Reset error message
+        setError('');
+        setSuccess('');
 
-        if (username === '' || password === '' || email === '' || confirmPassword === '') {
+        if (!username || !password || !email || !confirmPassword) {
             setError('Please fill in all fields');
             return;
         }
@@ -25,65 +27,79 @@ function SignUpPage() {
             return;
         }
 
-        setLoading(true);  // Set loading to true when starting the request
+        // basic email check
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            setError('Please enter a valid email');
+            return;
+        }
+
+        setLoading(true);
         try {
-            // Simulate successful sign-up with a timeout
+            // Replace this setTimeout with your real API call (await createAccount(...))
+            await new Promise((res) => setTimeout(res, 1400));
+            setSuccess('Account created successfully. Redirecting to login...');
             setTimeout(() => {
-                setLoading(false);  // Stop loading
-                navigate("/login");  // Redirect to login page after success
-            }, 2000);  // Delay for 2 seconds to simulate API request
+                setLoading(false);
+                navigate('/login');
+            }, 900);
         } catch (err) {
-            setError('Error: ' + err.message);  // Display error from backend
+            setError('Error: ' + (err?.message || 'Something went wrong'));
             setLoading(false);
         }
     };
 
-    // Redirect to login page
-    const redirectToLogin = () => {
-        navigate("/login");
-    };
+    const redirectToLogin = () => navigate('/login');
 
     return (
-        <div className="signup-container">
-            <div className="signup-card">
-                <h3 className="signup-title">Sign Up</h3>
-                <p className="signup-subtitle">Create a new account to get started</p>
-                <form onSubmit={handleSignUp} className="signup-form">
+        <div className="pp-signup-container">
+            <div className="pp-signup-card">
+                <div className="pp-logo-glow"></div>
+                <h3 className="pp-signup-title">
+                    <span className="pp-logo"></span> Create Account
+                </h3>
+                <p className="pp-signup-subtitle">Join and start editing like a pro</p>
+
+                <form onSubmit={handleSignUp} className="pp-signup-form" noValidate>
                     <input
-                        className="signup-input"
+                        className="pp-signup-input"
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        autoFocus
                     />
                     <input
-                        className="signup-input"
+                        className="pp-signup-input"
                         type="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <input
-                        className="signup-input"
+                        className="pp-signup-input"
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <input
-                        className="signup-input"
+                        className="pp-signup-input"
                         type="password"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
-                    {error && <p className="error-message">{error}</p>}
-                    <button className="signup-button" type="submit" disabled={loading}>
+
+                    {error && <p className="pp-error-message">{error}</p>}
+                    {success && <p className="pp-success-message">{success}</p>}
+
+                    <button className="pp-signup-button" type="submit" disabled={loading}>
                         {loading ? 'Signing Up...' : 'Sign Up'}
                     </button>
                 </form>
-                <div className="login-link">
-                    <p>Already have an account? <span onClick={redirectToLogin} className="login-link-text">Login</span></p>
+
+                <div className="pp-login-link">
+                    <p>Already have an account? <span onClick={redirectToLogin} className="pp-login-link-text">Login</span></p>
                 </div>
             </div>
         </div>

@@ -1,149 +1,169 @@
-/* Premiere Pro style login page */
-body {
-    background: linear-gradient(135deg, #181028 0%, #2a1956 100%);
-    min-height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+:root{
+    /* Cool, formal color palette (navy / teal / slate) */
+    --bg-1: #0b1720;      /* deep navy */
+    --bg-2: #0f2a36;      /* teal-navy gradient end */
+    --card-bg: rgba(255,255,255,0.03);
+    --surface: #0f2630;   /* card inner surface */
+    --accent: #2fa6b8;    /* teal accent */
+    --accent-2: #1f7f92;  /* darker teal */
+    --muted: #9fb3bf;     /* text-muted */
+    --input-bg: rgba(255,255,255,0.02);
+    --input-border: #244850;
+    --text: #e6f0f3;
+    --shadow: rgba(3,18,26,0.6);
+    --error: #e06a6a;
+    --success: #6fd6a7;
+    --radius: 12px;
+    --card-padding: 38px;
 }
 
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout */
 .pp-login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #181028 0%, #24124c 100%);
+    padding: 40px 20px;
 }
 
 .pp-login-card {
-    position: relative;
-    background: rgba(26, 7, 46, 0.96);
-    border-radius: 24px;
-    box-shadow: 0 6px 32px rgba(40, 10, 90, 0.45), 0 0 0 5px #4721a3;
-    padding: 48px 38px 36px 38px;
-    width: 350px;
+    width: 380px;
+    padding: var(--card-padding);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: calc(var(--radius) + 8px);
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 10px 30px var(--shadow);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    transition: box-shadow 0.3s;
+    align-items: stretch;
+    gap: 12px;
 }
 
-.pp-logo-glow {
-    position: absolute;
-    top: -70px; left: 50%; transform: translateX(-50%);
-    width: 140px; height: 140px;
-    background: radial-gradient(circle, #8c4cffcc 0%, #3b1d6e22 100%);
-    filter: blur(32px);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.pp-logo {
-    font-size: 2.6rem;
-    font-weight: 900;
-    color: #8c4cff;
-    letter-spacing: -0.15em;
-    background: linear-gradient(90deg, #8c4cff 60%, #4920a3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-right: 8px;
-    vertical-align: middle;
-    text-shadow: 0 0 12px #8c4cff44;
-}
-
+/* Header */
 .pp-login-title {
-    font-size: 2.1rem;
-    color: #f4f0fc;
-    margin-bottom: 8px;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    margin: 0;
+    font-size: 1.6rem;
     font-weight: 700;
-    letter-spacing: 1px;
-    z-index: 2;
+    color: var(--text);
+    letter-spacing: 0.2px;
     text-align: center;
 }
 
 .pp-login-subtitle {
-    color: #b9a5e6;
-    font-size: 1rem;
-    margin-bottom: 32px;
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
     text-align: center;
-    z-index: 2;
+    margin-bottom: 6px;
 }
 
+/* Form */
 .pp-login-form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    z-index: 2;
+    gap: 12px;
 }
 
 .pp-login-input {
-    background: rgba(51, 32, 73, 0.85);
-    color: #e8def8;
-    border: 2px solid #4721a3;
+    width: 100%;
+    padding: 12px 14px;
     border-radius: 10px;
-    padding: 13px 16px;
-    font-size: 1rem;
-    margin-bottom: 8px;
-    transition: border-color 0.2s, background 0.2s;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+    font-size: 0.98rem;
     outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+}
+
+.pp-login-input::placeholder {
+    color: rgba(159,179,191,0.55);
 }
 
 .pp-login-input:focus {
-    border-color: #8c4cff;
-    background: rgba(70, 51, 100, 0.95);
+    border-color: var(--accent);
+    box-shadow: 0 6px 18px rgba(47,166,184,0.08);
+    transform: translateY(-1px);
 }
 
+/* Button */
 .pp-login-button {
-    background: linear-gradient(90deg, #8c4cff 60%, #4920a3 100%);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
+    margin-top: 6px;
     padding: 12px;
-    font-size: 1.13rem;
+    border-radius: 10px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
     font-weight: 700;
-    letter-spacing: 0.05em;
-    box-shadow: 0 1px 8px #4721a399;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 6px 18px rgba(15,55,66,0.25);
+    transition: transform 80ms ease, opacity 120ms ease;
 }
 
-.pp-login-button:active {
-    transform: scale(0.98);
-}
+.pp-login-button:active { transform: translateY(1px) scale(.997); }
+.pp-login-button:disabled { opacity: 0.7; cursor: not-allowed; }
 
-.pp-login-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
+/* Messages */
 .pp-error-message {
-    color: #ff5e8e;
-    background: #2a114a;
+    margin: 6px 0 0 0;
+    color: var(--error);
+    background: rgba(224,106,106,0.06);
+    border-left: 3px solid rgba(224,106,106,0.18);
+    padding: 10px 12px;
     border-radius: 8px;
-    padding: 10px 16px;
-    margin-top: 14px;
-    font-size: 1rem;
-    text-align: center;
-    z-index: 2;
-    box-shadow: 0 0 0 2px #8c4cff22;
+    font-size: 0.95rem;
 }
 
+.pp-success-message {
+    margin: 6px 0 0 0;
+    color: var(--success);
+    background: rgba(111,214,167,0.06);
+    border-left: 3px solid rgba(111,214,167,0.18);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* Footer links */
 .pp-signup-link {
-    margin-top: 26px;
-    color: #b9a5e6;
-    font-size: 1rem;
+    margin-top: 12px;
     text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
 }
 
 .pp-signup-link-text {
-    color: #8c4cff;
-    font-weight: 700;
+    color: var(--accent);
+    font-weight: 600;
     cursor: pointer;
-    transition: text-decoration 0.2s;
     text-decoration: underline transparent;
 }
-.pp-signup-link-text:hover {
-    text-decoration: underline #8c4cff;
+.pp-signup-link-text:hover { text-decoration-color: rgba(47,166,184,0.24); }
+
+/* Small decorative accent (formal and subtle) */
+.pp-decor {
+    height: 6px;
+    width: 60px;
+    background: linear-gradient(90deg, rgba(47,166,184,0.9), rgba(31,127,146,0.9));
+    border-radius: 6px;
+    margin: 6px auto 16px auto;
+    opacity: 0.95;
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+    .pp-login-card { width: 94%; padding: 26px; }
+    .pp-login-title { font-size: 1.4rem; }
 }

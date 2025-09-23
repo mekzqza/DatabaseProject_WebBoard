@@ -1,67 +1,91 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // นำเข้า useNavigate สำหรับการเปลี่ยนหน้า
-
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for page redirection
+import './ CssStore/singup.css'
 function SignUpPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');  // State for confirm password
     const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);  // สถานะการโหลด
-    const [error, setError] = useState('');  // ข้อความแสดงข้อผิดพลาด
-    const navigate = useNavigate();  // ใช้ useNavigate เพื่อเปลี่ยนหน้า
+    const [loading, setLoading] = useState(false);  // Loading state
+    const [error, setError] = useState('');  // Error message
+    const navigate = useNavigate();  // Use navigate to redirect
 
-    // ฟังก์ชันสำหรับการสมัครสมาชิก
+    // Sign-up function
     const handleSignUp = async (e) => {
         e.preventDefault();
-        setError('');  // รีเซ็ตข้อความแสดงข้อผิดพลาด
-        if (username === '' || password === '' || email === '') {
+        setError('');  // Reset error message
+
+        if (username === '' || password === '' || email === '' || confirmPassword === '') {
             setError('Please fill in all fields');
             return;
         }
 
-        setLoading(true);  // ตั้งค่า loading เป็น true เมื่อเริ่มส่งคำขอ
-        try {
-            // ตัวอย่างการส่งข้อมูลไปที่ backend (คุณสามารถปรับให้เหมาะสมกับ API ของคุณ)
-            // const response = await sendSignUp({ username, password, email });
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
 
-            // สมมุติว่า API สมัครสมาชิกสำเร็จ
+        setLoading(true);  // Set loading to true when starting the request
+        try {
+            // Simulate successful sign-up with a timeout
             setTimeout(() => {
-                // เมื่อสมัครเสร็จเรียบร้อย
-                setLoading(false);  // ปิดสถานะการโหลด
-                navigate("/login");  // ไปที่หน้า Login
-            }, 2000);  // หน่วงเวลา 2 วินาทีเพื่อทดสอบ
+                setLoading(false);  // Stop loading
+                navigate("/login");  // Redirect to login page after success
+            }, 2000);  // Delay for 2 seconds to simulate API request
         } catch (err) {
-            setError('Error: ' + err.message);  // แสดงข้อผิดพลาดจาก backend
+            setError('Error: ' + err.message);  // Display error from backend
             setLoading(false);
         }
     };
 
+    // Redirect to login page
+    const redirectToLogin = () => {
+        navigate("/login");
+    };
+
     return (
-        <div style={{ padding: 16 }}>
-            <h2>Sign Up</h2>
-            <form onSubmit={handleSignUp}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                {error && <p style={{ color: 'red' }}>{error}</p>}  {/* แสดงข้อผิดพลาด */}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Signing Up...' : 'Sign Up'}
-                </button>
-            </form>
+        <div className="signup-container">
+            <div className="signup-card">
+                <h3 className="signup-title">Sign Up</h3>
+                <p className="signup-subtitle">Create a new account to get started</p>
+                <form onSubmit={handleSignUp} className="signup-form">
+                    <input
+                        className="signup-input"
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <input
+                        className="signup-input"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <input
+                        className="signup-input"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <input
+                        className="signup-input"
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {error && <p className="error-message">{error}</p>}
+                    <button className="signup-button" type="submit" disabled={loading}>
+                        {loading ? 'Signing Up...' : 'Sign Up'}
+                    </button>
+                </form>
+                <div className="login-link">
+                    <p>Already have an account? <span onClick={redirectToLogin} className="login-link-text">Login</span></p>
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,63 +1,69 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";  // นำเข้า useNavigate
+import { useNavigate } from "react-router-dom";  // Import useNavigate
 import { sendLogin } from './APIs/api';
-
-import './ CssStore/login.css'
+import './ CssStore/login.css';
 
 function LoginPage() {
     const [username, setU] = useState("");
     const [password, setP] = useState("");
     const [out, setOut] = useState("");
-    const [loading, setLoading] = useState(false);  // สถานะการโหลด
+    const [loading, setLoading] = useState(false);  // Loading state
 
-    const navigate = useNavigate();  // ใช้ useNavigate เพื่อเปลี่ยนหน้า
+    const navigate = useNavigate();  // Use navigate to change pages
 
-    // ฟังก์ชันสำหรับการล็อกอิน
+    // Login function
     async function onLogin(e) {
         e.preventDefault();
         if (username === "" || password === "") {
             setOut("Please fill in both username and password.");
             return;
         }
-        setLoading(true);  // ตั้งค่า loading เป็น true เมื่อเริ่มส่งคำขอ
+        setLoading(true);  // Set loading to true when the request starts
         try {
             const data = await sendLogin({ username, password });
             setOut(JSON.stringify(data, null, 2));
 
-            // ถ้าล็อกอินสำเร็จ จะไปหน้า /dashboard
+            // If login is successful, navigate to /dashboard
             if (data.success) {
-                navigate("/dashboard");  // เปลี่ยนหน้าไปที่ /dashboard
+                navigate("/dashboard");  // Redirect to dashboard
             } else {
-                setOut("Login failed. Please check your credentials.");
+                setOut("Login failed. Please check your credentials Niggaaaaa.");
             }
         } catch (err) {
             setOut("Error: " + err.message);
         } finally {
-            setLoading(false);  // ปิดสถานะการโหลดหลังจากเสร็จสิ้น
+            setLoading(false);  // Turn off loading state after completion
         }
     }
 
     return (
-        <div style={{ padding: 16 }}>
-            <h3>Login</h3>
-            <form onSubmit={onLogin}>
-                <input
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setU(e.target.value)}
-                />
-                <input
-                    placeholder="Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setP(e.target.value)}
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
-            <pre style={{ marginTop: 24 }}>{out}</pre>
-            <button onClick={() => navigate("/signup")}>Sign Up</button>  {/* รีไดเร็กต์ไปที่หน้า Signup */}
+        <div className="login-container">
+            <div className="login-card">
+                <h3 className="login-title">Login</h3>
+                <p className="login-subtitle">Enter your credentials to access your account</p>
+                <form onSubmit={onLogin} className="login-form">
+                    <input
+                        className="login-input"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setU(e.target.value)}
+                    />
+                    <input
+                        className="login-input"
+                        placeholder="Password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setP(e.target.value)}
+                    />
+                    <button className="login-button" type="submit" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
+                </form>
+                {out && <p className="error-message">{out}</p>}
+                <div className="signup-link">
+                    <p>Don't have an account? <span onClick={() => navigate("/signup")} className="signup-link-text">Sign Up</span></p>
+                </div>
+            </div>
         </div>
     );
 }

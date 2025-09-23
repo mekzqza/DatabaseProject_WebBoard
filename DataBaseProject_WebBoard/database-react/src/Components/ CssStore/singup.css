@@ -1,5 +1,5 @@
-/* Login Page Styles */
-.login-container {
+/* Sign Up Page Styles */
+.signup-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7,7 +7,7 @@
     background-color: #f4f7fc;
 }
 
-.login-card {
+.signup-card {
     width: 400px;
     background-color: white;
     border-radius: 8px;
@@ -16,26 +16,26 @@
     text-align: center;
 }
 
-.login-title {
+.signup-title {
     font-size: 2rem;
     font-weight: 600;
     color: #333;
     margin-bottom: 8px;
 }
 
-.login-subtitle {
+.signup-subtitle {
     font-size: 1rem;
     color: #666;
     margin-bottom: 24px;
 }
 
-.login-form {
+.signup-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.login-input {
+.signup-input {
     padding: 12px;
     font-size: 1rem;
     border: 1px solid #ddd;
@@ -44,11 +44,11 @@
     transition: all 0.3s ease;
 }
 
-.login-input:focus {
+.signup-input:focus {
     border-color: #007bff;
 }
 
-.login-button {
+.signup-button {
     padding: 12px;
     background-color: #007bff;
     color: white;
@@ -59,11 +59,11 @@
     transition: all 0.3s ease;
 }
 
-.login-button:disabled {
+.signup-button:disabled {
     background-color: #c6c6c6;
 }
 
-.login-button:hover:not(:disabled) {
+.signup-button:hover:not(:disabled) {
     background-color: #0056b3;
 }
 
@@ -73,17 +73,17 @@
     margin-top: 16px;
 }
 
-.signup-link {
+.login-link {
     margin-top: 16px;
 }
 
-.signup-link-text {
+.login-link-text {
     color: #007bff;
     cursor: pointer;
     font-weight: 500;
     text-decoration: underline;
 }
 
-.signup-link-text:hover {
+.login-link-text:hover {
     color: #0056b3;
 }

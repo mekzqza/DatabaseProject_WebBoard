@@ -89,12 +89,101 @@ public  class MyJDBC {
             e.printStackTrace();
         }
     }
+    // ฟังก์ชันอัปเดตชื่อผู้ใช้
+
+    public Map<String, String> selectUserByID(String userID) {
+        Map<String, String> user = new HashMap<>();
+        String query = "SELECT username, password FROM users WHERE userID = ?";  // คำสั่ง SQL
+
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // ตั้งค่าพารามิเตอร์ในคำสั่ง SQL
+            preparedStatement.setString(1, userID);  // ตั้งค่า userID ใน query
+
+            // รันคำสั่ง SELECT
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // ถ้าพบข้อมูลผู้ใช้
+            if (resultSet.next()) {
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                user.put("username", username);  // เก็บ username ใน Map
+                user.put("password", password);  // เก็บ password ใน Map
 
 
-//    public static void main(String[] args) {
-//        MyJDBC myJDBC =new MyJDBC();
+                System.out.println("userID:"+userID+" username:"+username+" password:"+password);
+            } else {
+                System.out.println("User not found with ID: " + userID);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();  // หากเกิดข้อผิดพลาด
+        }
+
+        return user;  // คืนค่าผลลัพธ์ (username, password)
+    }
+
+    public void updateUserName(String userID, String newUsername) {
+        String sql = "UPDATE users SET username = ? WHERE userID = ?";
+
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            // ตั้งค่าพารามิเตอร์ในคำสั่ง SQL
+            preparedStatement.setString(1, newUsername);  // ตั้งค่าชื่อผู้ใช้ใหม่
+            preparedStatement.setString(2, userID);  // ตั้งค่ารหัสผู้ใช้ (userID)
+
+            // รันคำสั่ง UPDATE
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            // เช็คจำนวนแถวที่ได้รับผลกระทบจากการอัปเดตข้อมูล
+            if (rowsAffected > 0) {
+                System.out.println("Username updated successfully!");
+            } else {
+                System.out.println("Failed to update username. User not found.");
+            }
+
+        } catch (SQLException e) {
+            // หากเกิดข้อผิดพลาด
+            e.printStackTrace();
+        }
+    }
+
+    // ฟังก์ชันอัปเดตรหัสผ่าน
+    public void updateUserPassword(String userID, String newPassword) {
+        String sql = "UPDATE users SET password = ? WHERE userID = ?";
+
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            // ตั้งค่าพารามิเตอร์ในคำสั่ง SQL
+            preparedStatement.setString(1, newPassword);  // ตั้งค่ารหัสผ่านใหม่
+            preparedStatement.setString(2, userID);  // ตั้งค่ารหัสผู้ใช้ (userID)
+
+            // รันคำสั่ง UPDATE
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            // เช็คจำนวนแถวที่ได้รับผลกระทบจากการอัปเดตข้อมูล
+            if (rowsAffected > 0) {
+                System.out.println("Password updated successfully!");
+            } else {
+                System.out.println("Failed to update password. User not found.");
+            }
+
+        } catch (SQLException e) {
+            // หากเกิดข้อผิดพลาด
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void main(String[] args) {
+        MyJDBC myJDBC =new MyJDBC();
 //        myJDBC.addNewUser("naruto","okage");
-//
-//   }
+//        myJDBC.updateUserPassword("1","asdasdasd");
+        myJDBC.selectUserByID("10");
+
+   }
 
 }

@@ -19,21 +19,21 @@ public class UserService {
         myJDBC.addNewUser(username, password);
     }
 
-//    public void upDateUsername(String userID, String newUsername){
-//        myJDBC.updateUserName(userID,newUsername);
-//    }
-//
-//    public void upDateUserPassword(String userid ,String password){
-//        myJDBC.updateUserPassword(userid,password);
-//    }
+    public void upDateUsername(String userID, String newUsername){
+        myJDBC.updateUserName(userID,newUsername);
+    }
+
+    public void upDateUserPassword(String userid ,String password){
+        myJDBC.updateUserPassword(userid,password);
+    }
 
 
-//    public void Start(){
-//        UserService userService = new UserService();
-//        MyJDBC myJDBC1 =new MyJDBC();
-//        userService.setMyJDBC(myJDBC1);
-//        userService.addNewUser("kuyyy","yaiii");
-//    }
+    public void Start(){
+        UserService userService = new UserService();
+        MyJDBC myJDBC1 =new MyJDBC();
+        userService.setMyJDBC(myJDBC1);
+        userService.addNewUser("kuyyy","yaiii");
+    }
 
 
 }

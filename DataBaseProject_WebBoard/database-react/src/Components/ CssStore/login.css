@@ -1,89 +1,149 @@
-/* Login Page Styles */
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f7fc;
+/* Premiere Pro style login page */
+body {
+    background: linear-gradient(135deg, #181028 0%, #2a1956 100%);
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
-.login-card {
-    width: 400px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 32px;
+.pp-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #181028 0%, #24124c 100%);
+}
+
+.pp-login-card {
+    position: relative;
+    background: rgba(26, 7, 46, 0.96);
+    border-radius: 24px;
+    box-shadow: 0 6px 32px rgba(40, 10, 90, 0.45), 0 0 0 5px #4721a3;
+    padding: 48px 38px 36px 38px;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.3s;
+}
+
+.pp-logo-glow {
+    position: absolute;
+    top: -70px; left: 50%; transform: translateX(-50%);
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, #8c4cffcc 0%, #3b1d6e22 100%);
+    filter: blur(32px);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.pp-logo {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #8c4cff;
+    letter-spacing: -0.15em;
+    background: linear-gradient(90deg, #8c4cff 60%, #4920a3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-right: 8px;
+    vertical-align: middle;
+    text-shadow: 0 0 12px #8c4cff44;
+}
+
+.pp-login-title {
+    font-size: 2.1rem;
+    color: #f4f0fc;
+    margin-bottom: 8px;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 2;
     text-align: center;
 }
 
-.login-title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 8px;
-}
-
-.login-subtitle {
+.pp-login-subtitle {
+    color: #b9a5e6;
     font-size: 1rem;
-    color: #666;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    text-align: center;
+    z-index: 2;
 }
 
-.login-form {
+.pp-login-form {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
+    z-index: 2;
 }
 
-.login-input {
-    padding: 12px;
+.pp-login-input {
+    background: rgba(51, 32, 73, 0.85);
+    color: #e8def8;
+    border: 2px solid #4721a3;
+    border-radius: 10px;
+    padding: 13px 16px;
     font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s, background 0.2s;
     outline: none;
-    transition: all 0.3s ease;
 }
 
-.login-input:focus {
-    border-color: #007bff;
+.pp-login-input:focus {
+    border-color: #8c4cff;
+    background: rgba(70, 51, 100, 0.95);
 }
 
-.login-button {
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
+.pp-login-button {
+    background: linear-gradient(90deg, #8c4cff 60%, #4920a3 100%);
+    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1.13rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    box-shadow: 0 1px 8px #4721a399;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.pp-login-button:active {
+    transform: scale(0.98);
+}
+
+.pp-login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.pp-error-message {
+    color: #ff5e8e;
+    background: #2a114a;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-top: 14px;
     font-size: 1rem;
+    text-align: center;
+    z-index: 2;
+    box-shadow: 0 0 0 2px #8c4cff22;
+}
+
+.pp-signup-link {
+    margin-top: 26px;
+    color: #b9a5e6;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.pp-signup-link-text {
+    color: #8c4cff;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: text-decoration 0.2s;
+    text-decoration: underline transparent;
 }
-
-.login-button:disabled {
-    background-color: #c6c6c6;
-}
-
-.login-button:hover:not(:disabled) {
-    background-color: #0056b3;
-}
-
-.error-message {
-    color: #ff3333;
-    font-size: 0.9rem;
-    margin-top: 16px;
-}
-
-.signup-link {
-    margin-top: 16px;
-}
-
-.signup-link-text {
-    color: #007bff;
-    cursor: pointer;
-    font-weight: 500;
-    text-decoration: underline;
-}
-
-.signup-link-text:hover {
-    color: #0056b3;
+.pp-signup-link-text:hover {
+    text-decoration: underline #8c4cff;
 }

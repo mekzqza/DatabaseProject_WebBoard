@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import { sendLogin } from './APIs/api';
 import './ CssStore/login.css';
 
@@ -7,9 +7,9 @@ function LoginPage() {
     const [username, setU] = useState("");
     const [password, setP] = useState("");
     const [out, setOut] = useState("");
-    const [loading, setLoading] = useState(false);  // Loading state
+    const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();  // Use navigate to change pages
+    const navigate = useNavigate();
 
     // Login function
     async function onLogin(e) {
@@ -18,50 +18,54 @@ function LoginPage() {
             setOut("Please fill in both username and password.");
             return;
         }
-        setLoading(true);  // Set loading to true when the request starts
+        setLoading(true);
         try {
             const data = await sendLogin({ username, password });
             setOut(JSON.stringify(data, null, 2));
 
             // If login is successful, navigate to /dashboard
             if (data.success) {
-                navigate("/dashboard");  // Redirect to dashboard
+                navigate("/dashboard");
             } else {
-                setOut("Login failed. Please check your credentials Niggaaaaa.");
+                setOut("Login failed. Please check your credentials.");
             }
         } catch (err) {
             setOut("Error: " + err.message);
         } finally {
-            setLoading(false);  // Turn off loading state after completion
+            setLoading(false);
         }
     }
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h3 className="login-title">Login</h3>
-                <p className="login-subtitle">Enter your credentials to access your account</p>
-                <form onSubmit={onLogin} className="login-form">
+        <div className="pp-login-container">
+            <div className="pp-login-card">
+                <div className="pp-logo-glow"></div>
+                <h3 className="pp-login-title">
+                    <span className="pp-logo"></span> Login
+                </h3>
+                <p className="pp-login-subtitle">Sign in to start editing like a pro</p>
+                <form onSubmit={onLogin} className="pp-login-form">
                     <input
-                        className="login-input"
+                        className="pp-login-input"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setU(e.target.value)}
+                        autoFocus
                     />
                     <input
-                        className="login-input"
+                        className="pp-login-input"
                         placeholder="Password"
                         type="password"
                         value={password}
                         onChange={(e) => setP(e.target.value)}
                     />
-                    <button className="login-button" type="submit" disabled={loading}>
+                    <button className="pp-login-button" type="submit" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
-                {out && <p className="error-message">{out}</p>}
-                <div className="signup-link">
-                    <p>Don't have an account? <span onClick={() => navigate("/signup")} className="signup-link-text">Sign Up</span></p>
+                {out && <p className="pp-error-message">{out}</p>}
+                <div className="pp-signup-link">
+                    <p>Don't have an account? <span onClick={() => navigate("/signup")} className="pp-signup-link-text">Sign Up</span></p>
                 </div>
             </div>
         </div>

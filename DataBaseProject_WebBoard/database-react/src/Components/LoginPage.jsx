@@ -7,17 +7,16 @@ function LoginPage() {
     const [password, setP] = useState("");
     const [out, setOut] = useState("");
 
-    // สร้าง useNavigate hook เพื่อทำการ redirect
-    const navigate = useNavigate();  // ใช้ useNavigate ในการเปลี่ยนหน้า
+    const navigate = useNavigate();  // ใช้ useNavigate เพื่อเปลี่ยนหน้า
 
-    // ฟังก์ชันเมื่อผู้ใช้กด submit
+    // ฟังก์ชันสำหรับการล็อกอิน
     async function onLogin(e) {
         e.preventDefault();
         try {
             const data = await sendLogin({ username, password });
             setOut(JSON.stringify(data, null, 2));
 
-            // ถ้าล็อกอินสำเร็จ จะทำการเปลี่ยนหน้าไปที่ /dashboard
+            // ถ้าล็อกอินสำเร็จ จะไปหน้า /dashboard
             if (data.success) {
                 navigate("/dashboard");  // เปลี่ยนหน้าไปที่ /dashboard
             } else {
@@ -37,6 +36,7 @@ function LoginPage() {
                 <button type="submit">Login</button>
             </form>
             <pre style={{marginTop:24}}>{out}</pre>
+            <button onClick={() => navigate("/signup")}>Sign Up</button>  {/* รีไดเร็กต์ไปที่หน้า Signup */}
         </div>
     );
 }

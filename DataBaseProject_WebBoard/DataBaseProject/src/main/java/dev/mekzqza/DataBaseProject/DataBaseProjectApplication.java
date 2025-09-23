@@ -1,5 +1,8 @@
 package dev.mekzqza.DataBaseProject;
 
+
+import ModulesClass.UserService;
+import dev.mekzqza.DataBaseProject.MyJDBC;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
@@ -8,7 +11,7 @@ import org.springframework.stereotype.Controller;  // เปลี่ยนเ�
 
 //import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
+
 import java.util.Map;
 
 @SpringBootApplication
@@ -16,12 +19,14 @@ import java.util.Map;
 
 
 class WebboadProjectApplication {
-	
+
+
+
 	@GetMapping("/greeting")
 	public String getGreeting(Model model) {
 
-		MyJDBC myJDBC =new MyJDBC();
-		String command = "SELECT * FROM user";
+		MyJDBC myJDBC = new MyJDBC();
+		String command = "SELECT * FROM users";
 
 		Map<String,String> credentials  = myJDBC.sQlSeLect(command);
 
@@ -40,6 +45,7 @@ class WebboadProjectApplication {
 	//RUNApp
 	public static void main(String[] args) {
 		SpringApplication.run(WebboadProjectApplication.class, args);
+
 	}
 	
 

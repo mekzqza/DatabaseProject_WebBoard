@@ -1,44 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";  // นำเข้า useNavigate
-import { sendLogin } from './Components/APIs/api';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import './App.css';
 
-function LoginPage() {
-    const [username, setU] = useState("");
-    const [password, setP] = useState("");
-    const [out, setOut] = useState("");
+import LoginPage from './Components/LoginPage';
+import DashboardPage from './Components/DashboardPage';
+import SignUpPage from './Components/SignUpPage';
 
-    // สร้าง useNavigate hook เพื่อทำการ redirect
-    const navigate = useNavigate();  // ใช้ useNavigate ในการเปลี่ยนหน้า
-
-    // ฟังก์ชันเมื่อผู้ใช้กด submit
-    async function onLogin(e) {
-        e.preventDefault();
-        try {
-            const data = await sendLogin({ username, password });
-            setOut(JSON.stringify(data, null, 2));
-
-            // ถ้าล็อกอินสำเร็จ จะทำการเปลี่ยนหน้าไปที่ /dashboard
-            if (data.success) {
-                navigate("/dashboard");  // เปลี่ยนหน้าไปที่ /dashboard
-            } else {
-                setOut("Login failed");
-            }
-        } catch (err) {
-            setOut("Error: " + err.message);
-        }
-    }
-
+function App() {
     return (
-        <div style={{ padding: 16 }}>
-            <h3>Login</h3>
-            <form onSubmit={onLogin}>
-                <input placeholder="username" value={username} onChange={e => setU(e.target.value)} />
-                <input placeholder="password" type="password" value={password} onChange={e => setP(e.target.value)} />
-                <button type="submit">Login</button>
-            </form>
-            <pre style={{marginTop:24}}>{out}</pre>
-        </div>
+        <Router>  {/* ห่อแอปทั้งหมดด้วย <Router> */}
+            <Routes>
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+            </Routes>
+        </Router>
     );
 }
 
-export default LoginPage;
+export default App;

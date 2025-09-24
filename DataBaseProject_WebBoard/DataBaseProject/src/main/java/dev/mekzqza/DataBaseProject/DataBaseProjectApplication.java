@@ -1,8 +1,7 @@
 package dev.mekzqza.DataBaseProject;
 
 
-import ModulesClass.UserService;
-import dev.mekzqza.DataBaseProject.MyJDBC;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
@@ -19,8 +18,6 @@ import java.util.Map;
 
 
 class WebboadProjectApplication {
-
-
 
 	@GetMapping("/greeting")
 	public String getGreeting(Model model) {

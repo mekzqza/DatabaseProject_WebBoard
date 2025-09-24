@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { sendLogin } from './APIs/api';
 import './ CssStore/login.css';
 
+import './ CssStore/animated-background.css';
 
 function LoginPage() {
     const [username, setU] = useState("");
@@ -26,7 +27,7 @@ function LoginPage() {
 
             // If login is successful, navigate to /dashboard
             if (data.success) {
-                navigate("/dashboard");
+                navigate("/");
             } else {
                 setOut("Login failed. Please check your credentials.");
             }
@@ -38,38 +39,51 @@ function LoginPage() {
     }
 
     return (
-        <div className="pp-login-container">
-            {/* Top-left Home tab (fixed position) */}
-            <Link to="/forumDashboard" className="pp-home-tab" aria-label="Home">Home</Link>
+        <div className="pp-page">
+            {/* Animated background layer (handled by CSS) */}
+            <div className="pp-animated-bg" aria-hidden="true">
+                <div className="bg-blobs">
+                    <div className="blob b1" />
+                    <div className="blob b2" />
+                    <div className="blob b3" />
+                    <div className="blob b4" />
+                </div>
+                <div className="bg-gradient" />
+            </div>
 
-            <div className="pp-login-card">
-                <div className="pp-logo-glow"></div>
-                <h3 className="pp-login-title">
-                    <span className="pp-logo"></span> Login
-                </h3>
-                <p className="pp-login-subtitle">Sign in to start editing like a pro</p>
-                <form onSubmit={onLogin} className="pp-login-form">
-                    <input
-                        className="pp-login-input"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setU(e.target.value)}
-                        autoFocus
-                    />
-                    <input
-                        className="pp-login-input"
-                        placeholder="Password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setP(e.target.value)}
-                    />
-                    <button className="pp-login-button" type="submit" disabled={loading}>
-                        {loading ? "Logging in..." : "Login"}
-                    </button>
-                </form>
-                {out && <p className="pp-error-message">{out}</p>}
-                <div className="pp-signup-link">
-                    <p>Don't have an account? <span onClick={() => navigate("/signup")} className="pp-signup-link-text">Sign Up</span></p>
+            {/* Bottom-left Home tab (kept if you use it elsewhere) */}
+            <Link to="/" className="pp-home-tab" aria-label="Home">Home</Link>
+
+            <div className="pp-login-container">
+                <div className="pp-login-card">
+                    <div className="pp-logo-glow"></div>
+                    <h3 className="pp-login-title">
+                        <span className="pp-logo"></span> Login
+                    </h3>
+                    <p className="pp-login-subtitle">Sign in to start editing like a pro</p>
+                    <form onSubmit={onLogin} className="pp-login-form">
+                        <input
+                            className="pp-login-input"
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setU(e.target.value)}
+                            autoFocus
+                        />
+                        <input
+                            className="pp-login-input"
+                            placeholder="Password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setP(e.target.value)}
+                        />
+                        <button className="pp-login-button" type="submit" disabled={loading}>
+                            {loading ? "Logging in..." : "Login"}
+                        </button>
+                    </form>
+                    {out && <p className="pp-error-message">{out}</p>}
+                    <div className="pp-signup-link">
+                        <p>Don't have an account? <span onClick={() => navigate("/signup")} className="pp-signup-link-text">Sign Up</span></p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,29 +1,26 @@
-const API ="http://localhost:8080";  //---->URL จากBackEND
+// Simple API helper using fetch
+// ใช้ URL ของ Spring Boot (เปลี่ยนเป็น URL จริงถ้าไม่ใช้ localhost:8080)
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-export async function sendLogin({ username, password } ) {
-    const res = await fetch(`${API}/api/submit`, {
+export async function sendLogin({ username, password }) {
+    const url = `${API_BASE}/api/submit`; // ตาม controller ที่ให้มา
+    const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+        },
+        // ถ้าคุณใช้ httpOnly cookie สำหรับ session/refresh token ให้ใส่ credentials: 'include'
+        // credentials: 'include',
         body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+
+    // ถ้าต้องการแยก case ของ HTTP status:
+    if (!res.ok) {
+        // ตัวอย่าง: 400/500
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `HTTP error ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data; // คาดหวัง shape: { status: true/false, message: "...", username: "..." }
 }
-// singUp API
-export async function sendRegister({ username, password } ) {
-    const res = await fetch(`${API}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-}
-
-
-
-// export async function getEcho(text) {
-//     const res = await fetch(`${API}/api/echo?text=${encodeURIComponent(text)}`);
-//     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-//     return res.json();
-// }

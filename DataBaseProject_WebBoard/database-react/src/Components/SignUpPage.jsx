@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './ CssStore/singup.css';
 
-
+import './ CssStore/animated-background.css';
 function SignUpPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -52,58 +52,71 @@ function SignUpPage() {
     const redirectToLogin = () => navigate('/login');
 
     return (
-        <div className="pp-signup-container">
-            {/* Top-left Home tab (fixed position) */}
-            <Link to="/forumDashboard" className="pp-home-tab" aria-label="Home">Home</Link>
+        <div className="pp-page">
+            {/* Animated background layer */}
+            <div className="pp-animated-bg" aria-hidden="true">
+                <div className="bg-blobs">
+                    <div className="blob b1" />
+                    <div className="blob b2" />
+                    <div className="blob b3" />
+                    <div className="blob b4" />
+                </div>
+                <div className="bg-gradient" />
+            </div>
 
-            <div className="pp-signup-card">
-                <div className="pp-logo-glow"></div>
-                <h3 className="pp-signup-title">
-                    <span className="pp-logo"></span> Create Account
-                </h3>
-                <p className="pp-signup-subtitle">Join and start editing like a pro</p>
+            {/* Bottom-left Home tab (if still needed on signup) */}
+            <Link to="/" className="pp-home-tab" aria-label="Home">Home</Link>
 
-                <form onSubmit={handleSignUp} className="pp-signup-form" noValidate>
-                    <input
-                        className="pp-signup-input"
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        autoFocus
-                    />
-                    <input
-                        className="pp-signup-input"
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        className="pp-signup-input"
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <input
-                        className="pp-signup-input"
-                        type="password"
-                        placeholder="Confirm Password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
+            <div className="pp-signup-container">
+                <div className="pp-signup-card">
+                    <div className="pp-logo-glow"></div>
+                    <h3 className="pp-signup-title">
+                        <span className="pp-logo"></span> Create Account
+                    </h3>
+                    <p className="pp-signup-subtitle">Join and start editing like a pro</p>
 
-                    {error && <p className="pp-error-message">{error}</p>}
-                    {success && <p className="pp-success-message">{success}</p>}
+                    <form onSubmit={handleSignUp} className="pp-signup-form" noValidate>
+                        <input
+                            className="pp-signup-input"
+                            type="text"
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            autoFocus
+                        />
+                        <input
+                            className="pp-signup-input"
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            className="pp-signup-input"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <input
+                            className="pp-signup-input"
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
 
-                    <button className="pp-signup-button" type="submit" disabled={loading}>
-                        {loading ? 'Signing Up...' : 'Sign Up'}
-                    </button>
-                </form>
+                        {error && <p className="pp-error-message">{error}</p>}
+                        {success && <p className="pp-success-message">{success}</p>}
 
-                <div className="pp-login-link">
-                    <p>Already have an account? <span onClick={redirectToLogin} className="pp-login-link-text">Login</span></p>
+                        <button className="pp-signup-button" type="submit" disabled={loading}>
+                            {loading ? 'Signing Up...' : 'Sign Up'}
+                        </button>
+                    </form>
+
+                    <div className="pp-login-link">
+                        <p>Already have an account? <span onClick={redirectToLogin} className="pp-login-link-text">Login</span></p>
+                    </div>
                 </div>
             </div>
         </div>

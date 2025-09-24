@@ -9,8 +9,8 @@ function App() {
     return (
         <Router>  {/* ห่อแอปทั้งหมดด้วย <Router> */}
             <Routes>
+                <Route path="/" element={<ForumDashboard />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/forumDashboard" element={<ForumDashboard />} />
                 <Route path="/signup" element={<SignUpPage />} />
             </Routes>
         </Router>

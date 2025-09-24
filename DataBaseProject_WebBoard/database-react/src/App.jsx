@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 
 import LoginPage from './Components/LoginPage';
-import DashboardPage from './Components/DashboardPage';
+import ForumDashboard from './Components/ForumDashboard';
 import SignUpPage from './Components/SignUpPage';
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
         <Router>  {/* ห่อแอปทั้งหมดด้วย <Router> */}
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/forumDashboard" element={<ForumDashboard />} />
                 <Route path="/signup" element={<SignUpPage />} />
             </Routes>
         </Router>

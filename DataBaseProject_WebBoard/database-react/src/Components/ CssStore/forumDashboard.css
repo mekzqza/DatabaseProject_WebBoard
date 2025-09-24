@@ -1,0 +1,230 @@
+:root{
+    --bg: #fafafa;
+    --card: #ffffff;
+    --muted: #6b7280;
+    --shadow: 0 6px 20px rgba(16,24,40,0.06);
+    --blue-50: #dbeafe;
+    --green-50: #dcfce7;
+    --amber-50: #fff7ed;
+    --blue-500: #3b82f6;
+    --green-500: #10b981;
+    --orange-500: #fb923c;
+    --purple-500: #a78bfa;
+    --radius: 12px;
+    --max-width: 1180px;
+}
+
+/* Page layout */
+.fd-page{
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: var(--bg);
+    color: #111827;
+    min-height: 100vh;
+}
+
+/* Header */
+.fd-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 24px;
+    background: var(--card);
+    border-bottom: 1px solid #eef2f7;
+    box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.fd-title{
+    font-size: 22px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fd-beta{
+    font-size: 12px;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #334155;
+}
+
+/* Header actions */
+.fd-actions{
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.fd-search{
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e6e9ee;
+    min-width: 260px;
+    outline: none;
+    background: #fff;
+}
+
+.fd-btn{
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    background: transparent;
+    cursor: pointer;
+}
+
+.fd-btn-primary{
+    background: #111827;
+    color: #fff;
+    border: none;
+}
+
+/* Container */
+.fd-container{
+    max-width: var(--max-width);
+    margin: 28px auto;
+    padding: 0 20px;
+}
+
+/* Stats row */
+.fd-stats-row{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.fd-stat-card{
+    background: var(--card);
+    padding: 18px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+}
+
+.fd-stat-left{
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.fd-icon-box{
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+}
+
+.fd-stat-value{
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.fd-stat-label{
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Section header */
+.fd-section-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 12px;
+}
+
+.fd-section-title{
+    margin: 0;
+    font-size: 18px;
+}
+
+.fd-new-thread{
+    background: #111827;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Categories grid */
+.fd-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.fd-cat-card{
+    background: var(--card);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fd-cat-left{
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.fd-dot{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+}
+
+.fd-cat-title{
+    font-weight: 700;
+}
+
+.fd-cat-desc{
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Recent threads */
+.fd-recent{
+    margin-top: 36px;
+}
+
+.fd-recent-placeholder{
+    margin-top: 12px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.fd-empty{
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-direction: column;
+    opacity: 0.9;
+}
+
+.fd-empty-icon{
+    font-size: 28px;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+    .fd-stats-row{ grid-template-columns: 1fr; }
+    .fd-grid{ grid-template-columns: 1fr; }
+    .fd-actions .fd-search{ display: none; }
+}

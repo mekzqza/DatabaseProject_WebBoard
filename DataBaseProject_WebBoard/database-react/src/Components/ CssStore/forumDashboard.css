@@ -68,12 +68,22 @@
     background: #fff;
 }
 
+/* ทำให้ Link ดูเหมือนปุ่ม */
 .fd-btn{
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid rgba(0,0,0,0.06);
     background: transparent;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fd-btn:hover{
+    transform: translateY(-1px);
 }
 
 .fd-btn-primary{

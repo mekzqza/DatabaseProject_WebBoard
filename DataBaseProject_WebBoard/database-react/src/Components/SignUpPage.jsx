@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './ CssStore/singup.css';
+
 
 function SignUpPage() {
     const [username, setUsername] = useState('');
@@ -52,6 +53,9 @@ function SignUpPage() {
 
     return (
         <div className="pp-signup-container">
+            {/* Top-left Home tab (fixed position) */}
+            <Link to="/forumDashboard" className="pp-home-tab" aria-label="Home">Home</Link>
+
             <div className="pp-signup-card">
                 <div className="pp-logo-glow"></div>
                 <h3 className="pp-signup-title">

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { sendLogin } from './APIs/api';
 import './ CssStore/login.css';
+
 
 function LoginPage() {
     const [username, setU] = useState("");
@@ -38,6 +39,9 @@ function LoginPage() {
 
     return (
         <div className="pp-login-container">
+            {/* Top-left Home tab (fixed position) */}
+            <Link to="/forumDashboard" className="pp-home-tab" aria-label="Home">Home</Link>
+
             <div className="pp-login-card">
                 <div className="pp-logo-glow"></div>
                 <h3 className="pp-login-title">

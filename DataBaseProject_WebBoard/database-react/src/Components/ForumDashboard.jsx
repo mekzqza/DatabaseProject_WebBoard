@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import './ CssStore/forumDashboard.css'
 
 const stats = [
@@ -23,8 +24,9 @@ export default function ForumDashboard() {
                 </div>
                 <div className="fd-actions">
                     <input className="fd-search" placeholder="Search threads..." />
-                    <button className="fd-btn">Sign In</button>
-                    <button className="fd-btn fd-btn-primary">Sign Up</button>
+                    {/* ใช้ Link เพื่อไปหน้า /login และ /signup */}
+                    <Link to="/login" className="fd-btn">Sign In</Link>
+                    <Link to="/signup" className="fd-btn fd-btn-primary">Sign Up</Link>
                 </div>
             </header>
 
@@ -70,7 +72,6 @@ export default function ForumDashboard() {
                 <section className="fd-recent">
                     <h3>Recent Threads</h3>
                     <div className="fd-recent-placeholder">
-                        {/* ใส่รายการ recent threads ที่นี่เมื่อพร้อม */}
                         <div className="fd-empty">
                             <div className="fd-empty-icon">📝</div>
                             <div>No recent threads yet</div>

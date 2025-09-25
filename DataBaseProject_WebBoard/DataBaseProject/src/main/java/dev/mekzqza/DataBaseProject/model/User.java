@@ -1,4 +1,4 @@
-package ModulesClass;
+package dev.mekzqza.DataBaseProject.model;
 
 public class User {
     private String id;

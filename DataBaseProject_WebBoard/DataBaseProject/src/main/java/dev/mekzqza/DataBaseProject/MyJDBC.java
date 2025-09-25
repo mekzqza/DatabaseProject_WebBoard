@@ -13,8 +13,6 @@ public  class MyJDBC {
     String dbPassword = "mek0934396759";  // รหัสผ่านฐานข้อมูล
 
 
-
-
     public Map<String ,String> sQlSeLect(String command){
         Map<String,String > userCredentials = new HashMap<>();
 
@@ -178,12 +176,41 @@ public  class MyJDBC {
     }
 
 
-    public static void main(String[] args) {
-        MyJDBC myJDBC =new MyJDBC();
-//        myJDBC.addNewUser("naruto","okage");
-//        myJDBC.updateUserPassword("1","asdasdasd");
-        myJDBC.selectUserByID("10");
+    public Map<String, String> getuserById(long id) {
+        Map<String, String> userCredentials = new HashMap<>();
+        String sql = "SELECT username, password_hash AS password FROM users WHERE user_id = ?";
 
-   }
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:mysql://127.0.0.1:3307/login_schema",
+                "root",
+                "mek0934396759");
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String username = rs.getString("username");
+                    String password = rs.getString("password"); // นี่คือ password_hash จาก DB
+                    userCredentials.put(username, password);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return userCredentials;
+    }
+
+
+
+//    public static void main(String[] args) {
+//        MyJDBC myJDBC =new MyJDBC();
+////        myJDBC.addNewUser("naruto","okage");
+////        myJDBC.updateUserPassword("1","asdasdasd");
+//        myJDBC.selectUserByID("10");
+//
+//   }
 
 }

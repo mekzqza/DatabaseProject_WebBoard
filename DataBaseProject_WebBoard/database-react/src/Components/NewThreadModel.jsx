@@ -1,28 +1,37 @@
 import React, { useState } from "react";
+import { createThread } from './APIs/apiThread';
 
-/**
- * Props:
- * - categories: [{id, title}]
- * - onClose: () => void
- * - onCreate: ({ title, categoryId, content, author }) => void
- */
 export default function NewThreadModal({ categories = [], onClose, onCreate }) {
     const [title, setTitle] = useState("");
     const [categoryId, setCategoryId] = useState(categories[0]?.id || "");
     const [content, setContent] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    function submit(e) {
+    async function submit(e) {
         e.preventDefault();
         setError("");
         if (!title.trim()) return setError("Please enter a thread title.");
         if (!categoryId) return setError("Please select a category.");
         if (!content.trim()) return setError("Please enter thread content.");
 
-        onCreate({ title: title.trim(), categoryId, content: content.trim(), author: "You" });
-        // reset (optional)
-        setTitle("");
-        setContent("");
+        setLoading(true);
+        try {
+            const res = await createThread({
+                title: title.trim(),
+                categoryId: Number(categoryId),
+                content: content.trim(),
+                author: "You"
+            });
+
+            const createdThread = res?.thread;
+            if (onCreate && createdThread) onCreate(createdThread);
+        } catch (err) {
+            console.error(err);
+            setError(err.body?.message || err.message || "Failed to create thread");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -52,8 +61,8 @@ export default function NewThreadModal({ categories = [], onClose, onCreate }) {
                     {error && <div className="fd-modal-error" role="alert">{error}</div>}
 
                     <div className="fd-modal-actions">
-                        <button type="button" className="fd-btn" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="fd-btn fd-btn-primary">Create Thread</button>
+                        <button type="button" className="fd-btn" onClick={onClose} disabled={loading}>Cancel</button>
+                        <button type="submit" className="fd-btn fd-btn-primary" disabled={loading}>{loading ? "Creating..." : "Create Thread"}</button>
                     </div>
                 </form>
             </div>

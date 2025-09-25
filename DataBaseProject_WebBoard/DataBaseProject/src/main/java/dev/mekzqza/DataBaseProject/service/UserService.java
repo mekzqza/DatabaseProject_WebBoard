@@ -1,4 +1,4 @@
-package ModulesClass;
+package dev.mekzqza.DataBaseProject.service;
 
 import dev.mekzqza.DataBaseProject.MyJDBC;
 import org.springframework.beans.factory.annotation.Autowired;

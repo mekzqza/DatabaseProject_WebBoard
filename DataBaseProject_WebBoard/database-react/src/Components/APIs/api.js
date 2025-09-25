@@ -21,6 +21,11 @@ export async function sendLogin({ username, password }) {
         throw new Error(text || `HTTP error ${res.status}`);
     }
 
+
+
+
+
+
     const data = await res.json();
     return data; // คาดหวัง shape: { status: true/false, message: "...", username: "..." }
 }

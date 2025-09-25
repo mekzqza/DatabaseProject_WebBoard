@@ -1,0 +1,121 @@
+/* Profile page styles */
+.profile-page {
+  padding: 28px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(180deg, rgba(15,23,42,0.02), rgba(255,255,255,0.01));
+}
+
+.profile-card {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  background: #ffffff;
+  padding: 20px 22px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+  max-width: 720px;
+  width: 100%;
+  border: 1px solid #eef2f7;
+}
+
+.profile-avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #111827, #0f1724);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.08);
+  position: relative;
+}
+
+/* avatar image (when uploaded) */
+.profile-avatar-img {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+}
+
+/* fallback (single-letter) for places that render just fallback element) */
+.profile-avatar-fallback {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#111827,#0b1220);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.profile-info {
+  flex: 1 1 auto;
+}
+
+.profile-name {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  color: #0f1724;
+}
+
+.profile-email {
+  margin: 0 0 8px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* join date & bio */
+.profile-meta {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.profile-bio {
+  margin: 10px 0 0 0;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 60ch;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #374151;
+  border-color: #e6e9ee;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg,#0f1724 0%, #111827 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+@media (max-width: 640px) {
+  .profile-card { flex-direction: column; align-items: center; text-align: center; padding: 18px; }
+  .profile-avatar { width: 80px; height: 80px; font-size: 28px; }
+  .profile-actions { justify-content: center; }
+}

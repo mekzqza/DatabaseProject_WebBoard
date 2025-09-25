@@ -1,0 +1,218 @@
+:root{
+    /* Cool, formal color palette (navy / teal / slate) */
+    --bg-1: #0b1720;      /* deep navy */
+    --bg-2: #0f2a36;      /* teal-navy gradient end */
+    --card-bg: rgba(255,255,255,0.03);
+    --surface: #0f2630;   /* card inner surface */
+    --accent: #2fa6b8;    /* teal accent */
+    --accent-2: #1f7f92;  /* darker teal */
+    --muted: #9fb3bf;     /* text-muted */
+    --input-bg: rgba(255,255,255,0.02);
+    --input-border: #244850;
+    --text: #e6f0f3;
+    --shadow: rgba(3,18,26,0.6);
+    --error: #e06a6a;
+    --success: #6fd6a7;
+    --radius: 12px;
+    --card-padding: 38px;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout */
+.pp-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.pp-login-card {
+    width: 380px;
+    padding: var(--card-padding);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: calc(var(--radius) + 8px);
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 10px 30px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+/* Header */
+.pp-login-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.2px;
+    text-align: center;
+}
+
+.pp-login-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+/* Form */
+.pp-login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pp-login-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+    font-size: 0.98rem;
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+}
+
+.pp-login-input::placeholder {
+    color: rgba(159,179,191,0.55);
+}
+
+.pp-login-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 6px 18px rgba(47,166,184,0.08);
+    transform: translateY(-1px);
+}
+
+/* Button */
+.pp-login-button {
+    margin-top: 6px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(15,55,66,0.25);
+    transition: transform 80ms ease, opacity 120ms ease;
+}
+
+.pp-login-button:active { transform: translateY(1px) scale(.997); }
+.pp-login-button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Messages */
+.pp-error-message {
+    margin: 6px 0 0 0;
+    color: var(--error);
+    background: rgba(224,106,106,0.06);
+    border-left: 3px solid rgba(224,106,106,0.18);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.pp-success-message {
+    margin: 6px 0 0 0;
+    color: var(--success);
+    background: rgba(111,214,167,0.06);
+    border-left: 3px solid rgba(111,214,167,0.18);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* Footer links */
+.pp-signup-link {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.pp-signup-link-text {
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline transparent;
+}
+.pp-signup-link-text:hover { text-decoration-color: rgba(47,166,184,0.24); }
+
+/* Small decorative accent (formal and subtle) */
+.pp-decor {
+    height: 6px;
+    width: 60px;
+    background: linear-gradient(90deg, rgba(47,166,184,0.9), rgba(31,127,146,0.9));
+    border-radius: 6px;
+    margin: 6px auto 16px auto;
+    opacity: 0.95;
+}
+
+/* ตำแหน่ง fixed ที่มุมบนซ้ายสุด (top-left) */
+/* นำไฟล์นี้ไปรวมกับไฟล์ CSS ของคุณ หรือ import ใน component ดังตัวอย่างด้านบน */
+
+.pp-home-tab {
+    position: fixed;
+    top: 8px;      /* ปรับค่าได้ตามต้องการ (ทำให้ชิดบนสุด) */
+    left: 8px;     /* ปรับค่าได้ตามต้องการ (ทำให้ชิดซ้ายสุด) */
+    z-index: 1200;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #111827;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(16,24,40,0.12);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* เพิ่ม effect เล็ก ๆ */
+.pp-home-tab:hover,
+.pp-home-tab:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(16,24,40,0.18);
+    outline: none;
+}
+
+/* หากหน้าของคุณมี header หรือ content ติดด้านบน ให้เพิ่ม margin/padding บนของคอนเทนเนอร์หลัก
+   เพื่อหลีกเลี่ยงการถูก tab ปิดบัง — แต่ถ้าชอบแบบทับด้านบนก็ไม่ต้องเพิ่ม */
+.pp-login-card,
+.pp-signup-card {
+    /* ถ้าต้องการให้การ์ดเลื่อนลงมาเล็กน้อยเพื่อไม่ให้ tab ทับ */
+    /* margin-top: 28px;  <-- ยกเลิกคอมเมนต์ถ้าต้องการ */
+}
+
+/* ปรับบนหน้าจอเล็ก */
+@media (max-width: 480px) {
+    .pp-home-tab {
+        top: 6px;
+        left: 6px;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+    .pp-login-card { width: 94%; padding: 26px; }
+    .pp-login-title { font-size: 1.4rem; }
+}

@@ -66,3 +66,116 @@ export async function sendRegister({ username, password, email }) {
 
     return await res.json();
 }
+
+// Helper to parse response and normalize error messages
+async function handleResponse(res) {
+    if (res.ok) {
+        // try to parse JSON, otherwise return text
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+            return await res.json();
+        }
+        return await res.text();
+    }
+
+    // parse error body if possible
+    let errMsg = '';
+    try {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+            const errJson = await res.json();
+            if (errJson && typeof errJson === 'object') {
+                errMsg = errJson.message || JSON.stringify(errJson);
+            } else {
+                errMsg = String(errJson);
+            }
+        } else {
+            errMsg = await res.text().catch(() => '');
+        }
+    } catch (e) {
+        // ignore
+    }
+
+    throw new Error(errMsg || `HTTP error ${res.status}`);
+}
+
+// API: รับรายชื่อผู้ใช้ทั้งหมด
+export async function getUsers() {
+    const url = `${API_BASE}/api/users`;
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+    return await handleResponse(res);
+}
+
+// API: รับผู้ใช้โดย id
+// คืนค่า object ที่มีฟิลด์ (ตาม DB): user_id, username, email, password_hash, avatar_url, bio, social_links, role
+export async function getUser(userId) {
+    if (!userId && userId !== 0) throw new Error('userId is required');
+    const url = `${API_BASE}/api/users/${encodeURIComponent(userId)}`;
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+    return await handleResponse(res);
+}
+
+// API: อัพเดตข้อมูลผู้ใช้ (PUT)
+// รับ object user ที่มีอย่างน้อย id/user_id และอื่นๆ เป็น optional
+export async function updateUser(user) {
+    if (!user || (!user.id && !user.user_id)) throw new Error('user (with id or user_id) is required');
+    const id = user.id || user.user_id;
+
+    // map fields to the names your backend expects
+    const payload = {
+        user_id: id,
+        username: user.username,
+        email: user.email,
+        // allow passing either password or password_hash
+        password_hash: user.password_hash || user.password,
+        avatar_url: user.avatar || user.avatar_url,
+        bio: user.bio,
+        social_links: user.social || user.social_links,
+        role: user.role,
+    };
+
+    const url = `${API_BASE}/api/users/${encodeURIComponent(id)}`;
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return await handleResponse(res);
+}
+
+// Optional: สร้างผู้ใช้ใหม่ (POST /api/users)
+export async function createUser(user) {
+    const url = `${API_BASE}/api/users`;
+    const payload = {
+        username: user.username,
+        email: user.email,
+        password_hash: user.password_hash || user.password,
+        avatar_url: user.avatar || user.avatar_url,
+        bio: user.bio,
+        social_links: user.social || user.social_links,
+        role: user.role,
+    };
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return await handleResponse(res);
+}

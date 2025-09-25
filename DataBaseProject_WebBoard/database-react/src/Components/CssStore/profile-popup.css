@@ -1,0 +1,154 @@
+/* Profile popup panel styled like the larger Google-style panel */
+.ppop-backdrop {
+  position: absolute;
+  right: 8px;
+  top: calc(100% + 8px);
+  z-index: 1400;
+}
+
+.ppop-panel {
+  width: 360px;
+  background: #111317; /* near black */
+  color: #e6eef6;
+  border-radius: 14px;
+  padding: 16px 18px 18px 18px;
+  box-shadow: 0 18px 48px rgba(2,6,23,0.6);
+  border: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.ppop-close {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(230,238,246,0.7);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ppop-top {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.ppop-email {
+  font-size: 13px;
+  color: rgba(230,238,246,0.9);
+  text-align: center;
+  font-weight: 600;
+}
+
+.ppop-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 12px 0;
+  border-radius: 10px;
+}
+
+.ppop-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#181a1f,#0b1220);
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 3px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 28px rgba(2,6,23,0.6);
+}
+
+.ppop-info {
+  text-align: center;
+}
+.ppop-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.ppop-subbtns { margin-top: 8px; }
+.ppop-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e6eef6;
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ppop-accounts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ppop-accounts-title {
+  font-size: 13px;
+  color: rgba(230,238,246,0.8);
+  padding: 6px 8px;
+}
+
+.ppop-account {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+}
+.ppop-account-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #1f2937;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+}
+.ppop-account-info { font-size: 13px; color: rgba(230,238,246,0.9); }
+.ppop-account-name { font-weight: 700; }
+.ppop-account-email { color: rgba(230,238,246,0.6); font-size: 12px; }
+
+.ppop-add {
+  margin-top: 6px;
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.06);
+  color: rgba(230,238,246,0.9);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.ppop-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.ppop-logout {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 420px) {
+  .ppop-panel { width: 300px; right: 6px; }
+}
+

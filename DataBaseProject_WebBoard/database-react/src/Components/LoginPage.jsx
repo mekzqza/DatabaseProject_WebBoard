@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { sendLogin } from './APIs/api';
-import './ CssStore/login.css';
-
-import './ CssStore/animated-background.css';
+import './CssStore/login.css'
+import './CssStore/animated-background.css';
+import { useAuth } from './AuthProvider';
 
 function LoginPage() {
     const [username, setU] = useState("");
@@ -12,6 +12,7 @@ function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     // Login function
     async function onLogin(e) {
@@ -23,13 +24,25 @@ function LoginPage() {
         setLoading(true);
         try {
             const data = await sendLogin({ username, password });
-            setOut(JSON.stringify(data, null, 2));
 
-            // If login is successful, navigate to /dashboard
-            if (data.success) {
+            // show server message if any
+            if (data && typeof data === 'object') {
+                setOut(data.message || '');
+            }
+
+            // If login is successful, navigate to /
+            // API returns { status: true/false, message: ... }
+            if (data && data.status) {
+                // set simple client-side auth state so header shows profile
+                try {
+                    login({ username: data.username || username, email: data.email || '' });
+                } catch (e) {
+                    // ignore
+                }
                 navigate("/");
             } else {
-                setOut("Login failed. Please check your credentials.");
+                // keep out message set above or show default
+                if (!data || !data.message) setOut("Login failed. Please check your credentials.");
             }
         } catch (err) {
             setOut("Error: " + err.message);

@@ -1,0 +1,50 @@
+:root{
+  --card-bg: #fff;
+  --muted: #6b7280;
+  --accent: #0f1724;
+}
+
+.ep-page{
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px 20px;
+  background: linear-gradient(180deg, rgba(15,23,42,0.02), rgba(255,255,255,0.01));
+}
+
+.ep-card{
+  width: 520px;
+  max-width: 100%;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 12px 32px rgba(15,23,42,0.06);
+  border: 1px solid #eef2f7;
+}
+
+.ep-card h2{ margin: 0 0 10px 0; font-size: 20px; }
+
+.ep-form{ display: flex; flex-direction: column; gap: 12px; }
+.ep-form label{ display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+.ep-form input{ padding: 10px 12px; border-radius: 8px; border: 1px solid #e6e9ee; font-size: 14px; }
+
+/* New styles for avatar + layout */
+.ep-top-row{ display:flex; gap:18px; align-items:flex-start; }
+.ep-avatar-col{ width:140px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.ep-avatar-img{ width:96px; height:96px; border-radius:999px; object-fit:cover; border:3px solid rgba(0,0,0,0.06); }
+.ep-avatar-fallback{ width:96px; height:96px; border-radius:999px; background: linear-gradient(135deg,#111827,#0b1220); color:#fff; display:grid; place-items:center; font-size:32px; font-weight:700; }
+.ep-avatar-actions{ display:flex; gap:8px; flex-direction:column; align-items:center; }
+.ep-fields-col{ flex:1 1 auto; display:flex; flex-direction:column; gap:8px; }
+.ep-join{ color:var(--muted); font-size:13px; margin-top:6px; }
+
+ep-form textarea, .ep-form textarea{ padding:10px 12px; border-radius:8px; border:1px solid #e6e9ee; font-size:14px; resize:vertical; }
+
+.ep-error{ color: #b91c1c; font-size: 13px; }
+
+.ep-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+.ep-btn{ padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; }
+.ep-cancel{ background:transparent; border:1px solid #ddd; color:#374151; }
+.ep-save{ background: linear-gradient(90deg,var(--accent), #111827); color:#fff; border:none; }
+
+@media (max-width:600px){ .ep-card{ width: 94%; } .ep-top-row{ flex-direction:column; align-items:center; } .ep-fields-col{ width:100%; } }

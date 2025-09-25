@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import NewThreadModal from "./NewThreadModel";
-import "./ CssStore/forumDashboard.css";
+import "./CssStore/forumDashboard.css";
+import { useAuth } from './AuthProvider';
+import ProfilePopup from './ProfilePopup';
 
 const initialStats = [
-    { id: 1, icon: "💬", value: 3, label: "Total Threads", color: "var(--blue-50)" },
-    { id: 2, icon: "👥", value: "5,678", label: "Active Members", color: "var(--green-50)" },
-    { id: 3, icon: "📈", value: 89, label: "Online Now", color: "var(--amber-50)" },
+    { id: 1, icon: "Chat", value: 3, label: "Total Threads", color: "var(--blue-50)" },
+    { id: 2, icon: "Members", value: "5,678", label: "Active Members", color: "var(--green-50)" },
+    { id: 3, icon: "Online", value: 89, label: "Online Now", color: "var(--amber-50)" },
 ];
 
 const initialCategories = [
@@ -21,6 +23,8 @@ export default function ForumDashboard() {
     const [categories, setCategories] = useState(initialCategories);
     const [recentThreads, setRecentThreads] = useState([]); // newest first
     const [isModalOpen, setModalOpen] = useState(false);
+    const { user } = useAuth();
+    const [showProfile, setShowProfile] = useState(false);
 
     function openNewThread() {
         setModalOpen(true);
@@ -64,10 +68,38 @@ export default function ForumDashboard() {
                 <div className="fd-brand">
                     <h1 className="fd-title">Forum Community <span className="fd-beta">Beta</span></h1>
                 </div>
-                <div className="fd-actions">
+                <div className="fd-actions" style={{ position: 'relative' }}>
                     <input className="fd-search" placeholder="Search threads..." />
-                    <Link to="/login" className="fd-btn">Sign In</Link>
-                    <Link to="/signup" className="fd-btn fd-btn-primary">Sign Up</Link>
+                    {!user ? (
+                        <>
+                            <Link to="/login" className="fd-btn">Sign In</Link>
+                            <Link to="/signup" className="fd-btn fd-btn-primary">Sign Up</Link>
+                        </>
+                    ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <button
+                                aria-label="Profile"
+                                title={user.username}
+                                onClick={() => setShowProfile((s) => !s)}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 999,
+                                    border: 'none',
+                                    background: '#0f1724',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {(user.username || 'U').charAt(0).toUpperCase()
+                                }
+                            </button>
+                            {showProfile && <ProfilePopup onClose={() => setShowProfile(false)} />}
+                        </div>
+                    )}
                 </div>
             </header>
 

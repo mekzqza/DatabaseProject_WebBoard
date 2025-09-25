@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './ CssStore/singup.css';
+import './CssStore/animated-background.css';
+import { sendRegister } from './APIs/api';
+import { useAuth } from './AuthProvider';
 
-import './ CssStore/animated-background.css';
 function SignUpPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -12,6 +14,7 @@ function SignUpPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSignUp = async (e) => {
         e.preventDefault();
@@ -36,13 +39,22 @@ function SignUpPage() {
 
         setLoading(true);
         try {
-            // Replace this setTimeout with your real API call (await createAccount(...))
-            await new Promise((res) => setTimeout(res, 1400));
-            setSuccess('Account created successfully. Redirecting to login...');
-            setTimeout(() => {
+            // call backend register API
+            const res = await sendRegister({ username, password, email });
+            if (res && res.status) {
+                // set client auth so header shows profile
+                try { login({ username: res.username || username, email: email }); } catch (e) {}
+                setSuccess(res.message || 'Account created successfully. Redirecting...');
+                // brief delay so user sees success message
+                setTimeout(() => {
+                    setLoading(false);
+                    navigate('/');
+                }, 900);
+            } else {
+                // server responded but indicated failure
+                setError(res?.message || 'Failed to create account');
                 setLoading(false);
-                navigate('/login');
-            }, 900);
+            }
         } catch (err) {
             setError('Error: ' + (err?.message || 'Something went wrong'));
             setLoading(false);

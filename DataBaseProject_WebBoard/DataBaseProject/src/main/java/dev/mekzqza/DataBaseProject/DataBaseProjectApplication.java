@@ -7,6 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;  // เปลี่ยนเป็น Controller
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 //import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -28,8 +31,9 @@ class WebboadProjectApplication {
 		Map<String,String> credentials  = myJDBC.sQlSeLect(command);
 
 		for (Map.Entry<String, String> entry : credentials.entrySet()) {
+			// ไม่โชว์ hash ตรงๆ เพื่อความปลอดภัย
 			model.addAttribute("message555",
-					"Username: " + entry.getKey() + ", Password: " + entry.getValue()
+					"Username: " + entry.getKey() + ", Password: [HIDDEN]"
 			);
 		}
 
@@ -37,7 +41,6 @@ class WebboadProjectApplication {
 
 		return "greeting";  // Spring Boot จะไปหา greeting.html ในโฟลเดอร์ templates
 	}
-
 
 	//RUNApp
 	public static void main(String[] args) {

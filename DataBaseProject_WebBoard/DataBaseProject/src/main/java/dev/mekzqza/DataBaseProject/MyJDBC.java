@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import Services.PasswordHash;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 public  class MyJDBC {
@@ -12,7 +13,6 @@ public  class MyJDBC {
     String url = "jdbc:mysql://127.0.0.1:3307/login_schema";
     String username = "root";  // ชื่อผู้ใช้ฐานข้อมูล
     String dbPassword = "mek0934396759";  // รหัสผ่านฐานข้อมูล
-
 
 
 
@@ -307,32 +307,33 @@ public  class MyJDBC {
     }
 
     // ฟังก์ชันอัปเดตรหัสผ่าน
-    public void updateUserPassword(String userID, String newPassword) {
+    // Modified: updateUserPassword now accepts an already-hashed password and returns boolean
+    public boolean updateUserPassword(String userID, String hashedPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
 
         try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-            // hash รหัสผ่านก่อนบันทึก
-            String hashed = newPassword != null ? PasswordHash.createHash(newPassword) : null;
-
-            // ตั้งค่าพารามิเตอร์ในคำสั่ง SQL
-            preparedStatement.setString(1, hashed);  // ตั้งค่ารหัสผ่านใหม่ (hashed)
-            preparedStatement.setString(2, userID);  // ตั้งค่ารหัสผู้ใช้ (user_id)
+            // ตั้งค่าพารามิเตอร์ในคำสั่ง SQL (assumes already hashed)
+            preparedStatement.setString(1, hashedPassword);
+            preparedStatement.setString(2, userID);
 
             // รันคำสั่ง UPDATE
             int rowsAffected = preparedStatement.executeUpdate();
 
             // เช็คจำนวนแถวที่ได้รับผลกระทบจากการอัปเดตข้อมูล
             if (rowsAffected > 0) {
-                System.out.println("Password updated successfully!");
+                System.out.println("Password updated successfully for user_id=" + userID);
+                return true;
             } else {
-                System.out.println("Failed to update password. User not found.");
+                System.out.println("Failed to update password. User not found: " + userID);
+                return false;
             }
 
         } catch (SQLException e) {
             // หากเกิดข้อผิดพลาด
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -348,13 +349,93 @@ public  class MyJDBC {
                 if (rs.next()) {
                     String storedHash = rs.getString("password_hash");
                     if (storedHash == null) return false;
-                    return PasswordHash.verifyPassword(plainPassword, storedHash);
+                    // Support both PBKDF2-style PasswordHash (custom) and BCrypt hashes
+                    if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
+                        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                        return encoder.matches(plainPassword, storedHash);
+                    } else {
+                        return PasswordHash.verifyPassword(plainPassword, storedHash);
+                    }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // New helper: get user_id by email
+    public String getUserIdByEmail(String emailValue) {
+        if (emailValue == null) return null;
+        String query = "SELECT user_id FROM users WHERE email = ? LIMIT 1";
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, emailValue);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("user_id");
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // New helper: save password reset token
+    public boolean savePasswordResetToken(String token, String userId, Timestamp expiresAt, Timestamp createdAt) {
+        String sql = "INSERT INTO password_reset_tokens (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, token);
+            ps.setString(2, userId);
+            ps.setTimestamp(3, expiresAt);
+            ps.setTimestamp(4, createdAt);
+            int n = ps.executeUpdate();
+            return n > 0;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            System.out.println("Token insert failed, duplicate token: " + token);
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // New helper: find password reset token record
+    // returns map with keys: user_id (String), expires_at (Timestamp), created_at (Timestamp)
+    public Map<String, Object> findPasswordResetToken(String token) {
+        String sql = "SELECT token, user_id, expires_at, created_at FROM password_reset_tokens WHERE token = ? LIMIT 1";
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> out = new HashMap<>();
+                    out.put("token", rs.getString("token"));
+                    out.put("user_id", rs.getString("user_id"));
+                    out.put("expires_at", rs.getTimestamp("expires_at"));
+                    out.put("created_at", rs.getTimestamp("created_at"));
+                    return out;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // New helper: delete token (consume)
+    public boolean deletePasswordResetToken(String token) {
+        String sql = "DELETE FROM password_reset_tokens WHERE token = ?";
+        try (Connection connection = DriverManager.getConnection(url, this.username, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, token);
+            int n = ps.executeUpdate();
+            return n > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static void main(String[] args) {

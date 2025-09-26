@@ -8,6 +8,7 @@ import LoginPage from './Components/LoginPage';
 import SignUpPage from './Components/SignUpPage';
 import Profile from './Components/Profile';
 import EditProfile from './Components/EditProfile';
+import ForgotPassword from './Components/ForgotPassword';
 
 export default function App() {
     return (
@@ -17,6 +18,7 @@ export default function App() {
                     <Route path="/" element={<ForumDashboard />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
+                    <Route path="/forgotpassword" element={<ForgotPassword />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
                 </Routes>

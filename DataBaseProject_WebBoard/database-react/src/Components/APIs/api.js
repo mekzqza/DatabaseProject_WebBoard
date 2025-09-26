@@ -179,3 +179,19 @@ export async function createUser(user) {
 
     return await handleResponse(res);
 }
+
+// API: ส่งคำขอลืมรหัสผ่าน (forgot password)
+// Request body: { email: string }
+export async function sendForgotPassword({ email }) {
+    if (!email || !email.toString().trim()) throw new Error('email is required');
+    const url = `${API_BASE}/api/auth/forgot-password`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+    });
+    return await handleResponse(res);
+}

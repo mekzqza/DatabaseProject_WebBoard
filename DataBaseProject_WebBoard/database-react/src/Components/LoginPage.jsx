@@ -96,6 +96,8 @@ function LoginPage() {
                     {out && <p className="pp-error-message">{out}</p>}
                     <div className="pp-signup-link">
                         <p>Don't have an account? <span onClick={() => navigate("/signup")} className="pp-signup-link-text">Sign Up</span></p>
+                        {/* Added forgot password link below */}
+                        <p><Link to="/forgotpassword" className="pp-forgot-link-text">Forgot password?</Link></p>
                     </div>
                 </div>
             </div>

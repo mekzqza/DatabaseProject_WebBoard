@@ -88,18 +88,46 @@ export async function createThread({ title, content, categoryId, userId }) {
         title,
         content,
     };
-    if (categoryId !== undefined && categoryId !== null) body.category_id = Number(categoryId);
-    if (userId !== undefined && userId !== null) body.user_id = userId;
+    if (categoryId !== undefined && categoryId !== null) {
+        const cid = Number(categoryId);
+        if (!Number.isNaN(cid)) body.category_id = cid;
+    }
+    if (userId !== undefined && userId !== null) {
+        const uid = Number(userId);
+        // only send a positive integer user id
+        if (!Number.isNaN(uid) && uid > 0) body.user_id = uid;
+    }
 
     const paths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
     let lastError = null;
     for (const url of paths) {
         try {
-            return await tryFetch(url, {
+            // call server
+            const res = await tryFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
+
+            // normalize common response envelopes
+            // possible shapes:
+            // 1) created thread object directly -> res
+            // 2) { thread: { ... } }
+            // 3) { data: { thread: { ... } } } or { data: {...} }
+            // 4) { success: true, thread: {...} }
+            if (!res) return res;
+            if (res.thread) return res.thread;
+            if (res.data) {
+                // data might be array or object
+                if (Array.isArray(res.data) && res.data.length > 0) return res.data[0];
+                if (res.data.thread) return res.data.thread;
+                return res.data;
+            }
+            // sometimes backend returns { result: {...} }
+            if (res.result) return res.result;
+
+            // otherwise assume res itself is the created thread
+            return res;
         } catch (e) {
             lastError = e;
             // try next

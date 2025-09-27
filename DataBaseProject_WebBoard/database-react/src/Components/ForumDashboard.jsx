@@ -48,9 +48,35 @@ export default function ForumDashboard() {
             return;
         }
 
+        // derive numeric user id robustly (from auth user or localStorage fallback)
+        let uid = undefined;
+        try {
+            const candidate = user && (user.id ?? user.user_id ?? user.userId ?? user.uid);
+            uid = Number(candidate);
+            if (!uid || uid <= 0) {
+                const raw = localStorage.getItem('user');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const cand2 = parsed && (parsed.id ?? parsed.user_id ?? parsed.userId ?? parsed.uid);
+                    uid = Number(cand2);
+                }
+            }
+        } catch (e) {
+            uid = undefined;
+        }
+
+        if (!uid || uid <= 0) {
+            // still no valid user id
+            if (window.confirm('Could not determine your user id. Do you want to go to login to refresh your session?')) {
+                navigate('/login');
+            } else {
+                alert('Please login before creating a thread.');
+            }
+            return;
+        }
+
         // call backend API to create thread
         try {
-            const uid = user && (user.id || user.user_id || user.userId);
             const payload = {
                 title,
                 content,

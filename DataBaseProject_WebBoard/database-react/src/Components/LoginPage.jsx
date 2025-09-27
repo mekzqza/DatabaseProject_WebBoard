@@ -39,6 +39,12 @@ function LoginPage() {
                     const uid = data.user_id ?? data.id ?? data.userId ?? undefined;
                     const userObj = { username: data.username || username, email: data.email || '' };
                     if (uid !== undefined) userObj.id = uid;
+                    // store token if backend returned one (name variations handled)
+                    const token = data.token ?? data.accessToken ?? data.access_token ?? undefined;
+                    if (token) {
+                        try { localStorage.setItem('token', token); } catch(e) { /* ignore */ }
+                        userObj.token = token;
+                    }
                     login(userObj);
                 } catch (e) {
                     // ignore

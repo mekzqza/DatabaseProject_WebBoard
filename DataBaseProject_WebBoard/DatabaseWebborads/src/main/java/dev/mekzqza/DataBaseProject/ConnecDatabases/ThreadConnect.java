@@ -17,13 +17,49 @@ public class ThreadConnect {
     String dbPassword = "mek0934396759";
 
     /**
+     * Check whether a category exists (by category_id).
+     */
+    public boolean categoryExists(long categoryId) {
+        if (categoryId <= 0) return false;
+        String sql = "SELECT 1 FROM categories WHERE category_id = ? LIMIT 1";
+        try (Connection conn = DriverManager.getConnection(url, username, dbPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Check whether a user exists (by user_id).
+     */
+    public boolean userExists(long userId) {
+        if (userId <= 0) return false;
+        String sql = "SELECT 1 FROM users WHERE user_id = ? LIMIT 1";
+        try (Connection conn = DriverManager.getConnection(url, username, dbPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Insert a new thread into `threads` table and return the generated thread_id.
      *
      * @param categoryId category id (required)
      * @param userId     user id (required)
      * @param title      thread title (required, non-blank)
      * @param content    thread content (required)
-     * @return the generated thread_id
+     * @return the generated thread_id or -1 on failure
      */
     public long newThread(long categoryId, long userId, String title, String content) {
 
@@ -31,6 +67,16 @@ public class ThreadConnect {
         if (userId <= 0) throw new IllegalArgumentException("userId is required");
         if (title == null || title.isBlank()) throw new IllegalArgumentException("title is required");
         if (content == null) throw new IllegalArgumentException("content is required");
+
+        // validate category and user exist to avoid FK violations
+        if (!categoryExists(categoryId)) {
+            System.err.println("Category not found: " + categoryId);
+            return -1;
+        }
+        if (!userExists(userId)) {
+            System.err.println("User not found: " + userId);
+            return -1;
+        }
 
         String insertSql = "INSERT INTO threads (category_id, user_id, title, content, created_at, updated_at) " +
                 "VALUES (?, ?, ?, ?, NOW(), NOW())";
@@ -91,6 +137,35 @@ public class ThreadConnect {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * Retrieve a single thread by id.
+     */
+    public ThreadRow getThreadById(long threadId) {
+        if (threadId <= 0) return null;
+        String sql = "SELECT thread_id, category_id, user_id, title, content, created_at, updated_at FROM threads WHERE thread_id = ? LIMIT 1";
+        try (Connection conn = DriverManager.getConnection(url, username, dbPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, threadId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    long id = rs.getLong("thread_id");
+                    long categoryId = rs.getLong("category_id");
+                    long userId = rs.getLong("user_id");
+                    String title = rs.getString("title");
+                    String content = rs.getString("content");
+                    Timestamp cts = rs.getTimestamp("created_at");
+                    Timestamp uts = rs.getTimestamp("updated_at");
+                    LocalDateTime createdAt = cts != null ? cts.toLocalDateTime() : null;
+                    LocalDateTime updatedAt = uts != null ? uts.toLocalDateTime() : null;
+                    return new ThreadRow(id, categoryId, userId, title, content, createdAt, updatedAt);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

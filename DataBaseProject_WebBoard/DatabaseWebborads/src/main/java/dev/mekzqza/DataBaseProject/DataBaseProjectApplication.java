@@ -47,7 +47,4 @@ class WebboadProjectApplication {
 		SpringApplication.run(WebboadProjectApplication.class, args);
 
 	}
-	
-
-
 }

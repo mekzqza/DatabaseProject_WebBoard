@@ -24,6 +24,8 @@ export async function sendLogin({ username, password }) {
     return await res.json();
 }
 
+//Check point
+
 // เพิ่มฟังก์ชันส่งข้อมูลสมัครสมาชิกไปยัง Spring Boot /api/register
 export async function sendRegister({ username, password, email }) {
     const url = `${API_BASE}/api/register`;

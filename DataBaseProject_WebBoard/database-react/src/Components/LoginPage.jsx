@@ -35,7 +35,11 @@ function LoginPage() {
             if (data && data.status) {
                 // set simple client-side auth state so header shows profile
                 try {
-                    login({ username: data.username || username, email: data.email || '' });
+                    // include any id/user_id/userId returned by the server so we can pass user id when creating threads
+                    const uid = data.user_id ?? data.id ?? data.userId ?? undefined;
+                    const userObj = { username: data.username || username, email: data.email || '' };
+                    if (uid !== undefined) userObj.id = uid;
+                    login(userObj);
                 } catch (e) {
                     // ignore
                 }

@@ -137,15 +137,14 @@ public class ThreadConnect {
     }
 
     // add a small main() to demonstrate getAllThreads()
-//    public static void main(String[] args) {
-//
-//        ThreadConnect tc = new ThreadConnect();
-//        System.out.println("Fetching threads from DB...");
-//        List<ThreadRow> threads = tc.getAllThreads();
-//        System.out.println("Found " + threads.size() + " threads:");
-//        for (ThreadRow r : threads) {
-//            System.out.println(r);
-//        }
-//    }
+    public static void main(String[] args) {
+        ThreadConnect tc = new ThreadConnect();
+        System.out.println("Fetching threads from DB...");
+        List<ThreadRow> threads = tc.getAllThreads();
+        System.out.println("Found " + threads.size() + " threads:");
+        for (ThreadRow r : threads) {
+            System.out.println(r);
+        }
+    }
 
 }

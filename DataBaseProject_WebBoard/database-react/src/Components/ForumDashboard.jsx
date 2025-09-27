@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import NewThreadModal from "./NewThreadModel";
 import "./CssStore/forumDashboard.css";
 import { useAuth } from './AuthProvider';
 import ProfilePopup from './ProfilePopup';
+import { getThreads, createThread } from './APIs/ThreadsApi';
 
 const initialStats = [
     { id: 1, icon: "Chat", value: 3, label: "Total Threads", color: "var(--blue-50)" },
@@ -25,6 +26,9 @@ export default function ForumDashboard() {
     const [isModalOpen, setModalOpen] = useState(false);
     const { user } = useAuth();
     const [showProfile, setShowProfile] = useState(false);
+    const [loadingThreads, setLoadingThreads] = useState(false);
+    const [threadsError, setThreadsError] = useState('');
+    const navigate = useNavigate();
 
     function openNewThread() {
         setModalOpen(true);
@@ -34,31 +38,100 @@ export default function ForumDashboard() {
     }
 
     // called when modal submits a new thread
-    function handleCreateThread({ title, categoryId, content, author = "You" }) {
-        // create new thread object
-        const newThread = {
-            id: Date.now(), // simple unique id
-            title,
-            categoryId,
-            categoryTitle: categories.find((c) => c.id === Number(categoryId))?.title || "General",
-            content,
-            author,
-            createdAt: new Date().toISOString(),
-        };
+    async function handleCreateThread({ title, categoryId, content, author = "You" }) {
+        // require login to create threads
+        if (!user) {
+            // redirect to login or show message
+            if (window.confirm('You must be logged in to create a thread. Go to login?')) {
+                navigate('/login');
+            }
+            return;
+        }
 
-        // prepend to recentThreads
-        setRecentThreads((prev) => [newThread, ...prev].slice(0, 20)); // keep last 20
+        // call backend API to create thread
+        try {
+            const uid = user && (user.id || user.user_id || user.userId);
+            const payload = {
+                title,
+                content,
+                categoryId: Number(categoryId),
+                userId: uid,
+            };
 
-        // increment category threads count
-        setCategories((prevCats) =>
-            prevCats.map((c) =>
-                c.id === Number(categoryId) ? { ...c, threads: (c.threads || 0) + 1 } : c
-            )
-        );
+            const created = await createThread({ title, content, categoryId: Number(categoryId), userId: uid });
 
-        // close modal
-        setModalOpen(false);
+            // map backend response to UI thread shape
+            const id = created.thread_id ?? created.threadId ?? created.id ?? Date.now();
+            const catId = created.category_id ?? created.categoryId ?? categoryId;
+            const createdAt = created.created_at ?? created.createdAt ?? new Date().toISOString();
+            const userId = created.user_id ?? created.userId ?? uid;
+
+            const newThread = {
+                id,
+                title: created.title ?? title,
+                categoryId: Number(catId),
+                categoryTitle: categories.find((c) => c.id === Number(catId))?.title || "General",
+                content: created.content ?? content,
+                author: (created.username ?? created.author ?? (userId ? `User ${userId}` : author)),
+                createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
+            };
+
+            // prepend to recentThreads
+            setRecentThreads((prev) => [newThread, ...prev].slice(0, 20)); // keep last 20
+
+            // increment category threads count
+            setCategories((prevCats) =>
+                prevCats.map((c) =>
+                    c.id === Number(catId) ? { ...c, threads: (c.threads || 0) + 1 } : c
+                )
+            );
+
+            setModalOpen(false);
+        } catch (err) {
+            // show a simple error - you can replace with a nicer UI state
+            console.error('Failed to create thread', err);
+            alert('Failed to create thread: ' + (err.message || err));
+        }
     }
+
+    // fetch threads on mount
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            setLoadingThreads(true);
+            setThreadsError('');
+            try {
+                const data = await getThreads();
+                if (cancelled) return;
+
+                // data expected to be an array of thread rows from backend
+                const mapped = (Array.isArray(data) ? data : []).map((t) => {
+                    const id = t.thread_id ?? t.threadId ?? t.id;
+                    const catId = t.category_id ?? t.categoryId ?? t.categoryId;
+                    const userId = t.user_id ?? t.userId ?? t.userId;
+                    const createdAt = t.created_at ?? t.createdAt ?? new Date().toISOString();
+                    return {
+                        id,
+                        title: t.title,
+                        categoryId: Number(catId || 0),
+                        categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
+                        content: t.content,
+                        author: t.username ?? `User ${userId ?? ''}`,
+                        createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
+                    };
+                });
+
+                setRecentThreads(mapped);
+            } catch (e) {
+                console.error('Failed to load threads', e);
+                setThreadsError(e?.message || 'Failed to load threads from server');
+            } finally {
+                setLoadingThreads(false);
+            }
+        }
+        load();
+        return () => { cancelled = true; };
+    }, []); // run once on mount
 
     return (
         <div className="fd-page">
@@ -144,7 +217,50 @@ export default function ForumDashboard() {
 
                 <section className="fd-recent">
                     <h3>Recent Threads</h3>
-                    {recentThreads.length === 0 ? (
+                    {loadingThreads ? (
+                        <div>Loading threads...</div>
+                    ) : threadsError ? (
+                        <div className="fd-recent-placeholder">
+                            <div className="fd-empty">
+                                <div className="fd-empty-icon">⚠️</div>
+                                <div>Error loading threads: {threadsError}</div>
+                                <div style={{ marginTop: 8 }}>
+                                    <button className="fd-btn" onClick={() => {
+                                        // retry by reloading the component effect (quick way)
+                                        setRecentThreads([]);
+                                        setThreadsError('');
+                                        setLoadingThreads(true);
+                                        // call getThreads again
+                                        (async () => {
+                                            try {
+                                                const data = await getThreads();
+                                                const mapped = (Array.isArray(data) ? data : []).map((t) => {
+                                                    const id = t.thread_id ?? t.threadId ?? t.id;
+                                                    const catId = t.category_id ?? t.categoryId ?? t.categoryId;
+                                                    const userId = t.user_id ?? t.userId ?? t.userId;
+                                                    const createdAt = t.created_at ?? t.createdAt ?? new Date().toISOString();
+                                                    return {
+                                                        id,
+                                                        title: t.title,
+                                                        categoryId: Number(catId || 0),
+                                                        categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
+                                                        content: t.content,
+                                                        author: t.username ?? `User ${userId ?? ''}`,
+                                                        createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
+                                                    };
+                                                });
+                                                setRecentThreads(mapped);
+                                            } catch (e) {
+                                                setThreadsError(e?.message || 'Failed to load threads');
+                                            } finally {
+                                                setLoadingThreads(false);
+                                            }
+                                        })();
+                                    }}>Retry</button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : recentThreads.length === 0 ? (
                         <div className="fd-recent-placeholder">
                             <div className="fd-empty">
                                 <div className="fd-empty-icon">📝</div>

@@ -127,7 +127,7 @@ export async function getUser(userId) {
 
 // API: อัพเดตข้อมูลผู้ใช้ (PUT)
 // รับ object user ที่มีอย่างน้อย id/user_id และอื่นๆ เป็น optional
-export async function updateUser(user) {
+export async function updateUser(user, token) {
     if (!user || (!user.id && !user.user_id)) throw new Error('user (with id or user_id) is required');
     const id = user.id || user.user_id;
 
@@ -143,13 +143,16 @@ export async function updateUser(user) {
         social_links: user.social || user.social_links,
         role: user.role,
     };
-
     const url = `${API_BASE}/api/users/${encodeURIComponent(id)}`;
+
+    // prefer explicit token param, otherwise try localStorage token
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
     const res = await fetch(url, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(payload),
     });
 
@@ -193,5 +196,45 @@ export async function sendForgotPassword({ email }) {
         },
         body: JSON.stringify({ email }),
     });
+    return await handleResponse(res);
+}
+
+// API: รับรายการ Threads ทั้งหมด
+export async function getThreads() {
+    const url = `${API_BASE}/api/threads`;
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+    return await handleResponse(res);
+}
+
+// API: สร้าง Thread ใหม่ (ต้องมีการยืนยันตัวตน)
+// thread: { title, content, category_id }
+// token: optional JWT; หากไม่ใส่ จะพยายามอ่านจาก localStorage.getItem('token')
+export async function createThread(thread, token) {
+    if (!thread || !thread.title || !thread.content) throw new Error('title and content are required');
+    const url = `${API_BASE}/api/threads`;
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const body = JSON.stringify({
+        title: thread.title,
+        content: thread.content,
+        category_id: thread.category_id || null
+    });
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body
+    });
+
     return await handleResponse(res);
 }

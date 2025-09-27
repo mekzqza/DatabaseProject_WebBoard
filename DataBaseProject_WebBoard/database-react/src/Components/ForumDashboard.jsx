@@ -7,34 +7,78 @@ import ProfilePopup from './ProfilePopup';
 import { getThreads, createThread } from './APIs/ThreadsApi';
 
 const initialStats = [
-    { id: 1, icon: "Chat", value: 3, label: "Total Threads", color: "var(--blue-50)" },
+    // initialize total threads to 0 — we'll update from the API on mount
+    { id: 1, icon: "Chat", value: 0, label: "Total Threads", color: "var(--blue-50)" },
     { id: 2, icon: "Members", value: "5,678", label: "Active Members", color: "var(--green-50)" },
     { id: 3, icon: "Online", value: 89, label: "Online Now", color: "var(--amber-50)" },
 ];
 
 const initialCategories = [
-    { id: 1, title: "General Discussion", desc: "Talk about anything and everything", threads: 45, dot: "var(--blue-500)" },
-    { id: 2, title: "Technology", desc: "Latest tech news and discussions", threads: 32, dot: "var(--green-500)" },
-    { id: 3, title: "Help & Support", desc: "Get help from the community", threads: 18, dot: "var(--orange-500)" },
-    { id: 4, title: "Announcements", desc: "Important updates and news", threads: 8, dot: "var(--purple-500)" },
+    { id: 1, title: "General Discussion", desc: "Talk about anything and everything", threads: 0, dot: "var(--blue-500)" },
+    { id: 2, title: "Technology", desc: "Latest tech news and discussions", threads: 0, dot: "var(--green-500)" },
+    { id: 3, title: "Help & Support", desc: "Get help from the community", threads: 0, dot: "var(--orange-500)" },
+    { id: 4, title: "Announcements", desc: "Important updates and news", threads: 0, dot: "var(--purple-500)" },
 ];
 
 export default function ForumDashboard() {
-    const [stats] = useState(initialStats);
+    // make stats writable so we can update the Total Threads value
+    const [stats, setStats] = useState(initialStats);
     const [categories, setCategories] = useState(initialCategories);
+    const [searchQuery, setSearchQuery] = useState('');
     const [recentThreads, setRecentThreads] = useState([]); // newest first
     const [isModalOpen, setModalOpen] = useState(false);
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [showProfile, setShowProfile] = useState(false);
     const [loadingThreads, setLoadingThreads] = useState(false);
     const [threadsError, setThreadsError] = useState('');
     const navigate = useNavigate();
+    const searchTimerRef = React.useRef(null);
 
     function openNewThread() {
         setModalOpen(true);
     }
     function closeNewThread() {
         setModalOpen(false);
+    }
+
+    // helper: load threads (optionally with search query q)
+    async function loadThreads(q = null) {
+        setLoadingThreads(true);
+        setThreadsError('');
+        try {
+            const data = await getThreads(q);
+            // data expected to be an array of thread rows from backend
+            const mapped = (Array.isArray(data) ? data : []).map((t) => {
+                const id = t.thread_id ?? t.threadId ?? t.id;
+                const catId = t.category_id ?? t.categoryId ?? t.categoryId;
+                const userId = t.user_id ?? t.userId ?? t.userId;
+                const createdAt = t.created_at ?? t.createdAt ?? new Date().toISOString();
+                return {
+                    id,
+                    title: t.title,
+                    categoryId: Number(catId || 0),
+                    categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
+                    content: t.content,
+                    author: t.username ?? `User ${userId ?? ''}`,
+                    createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
+                };
+            });
+
+            setRecentThreads(mapped);
+            // update Total Threads stat
+            const total = mapped.length;
+            setStats(prev => prev.map(s => s.id === 1 ? { ...s, value: total } : s));
+
+            // update category thread counts from fetched threads
+            const counts = {};
+            mapped.forEach(m => { counts[m.categoryId] = (counts[m.categoryId] || 0) + 1; });
+            setCategories(prevCats => prevCats.map(c => ({ ...c, threads: counts[c.id] || 0 })));
+        } catch (e) {
+            console.error('Failed to load threads', e);
+            setThreadsError(e?.message || 'Failed to load threads from server');
+        } finally {
+            setLoadingThreads(false);
+        }
     }
 
     // called when modal submits a new thread
@@ -77,14 +121,8 @@ export default function ForumDashboard() {
 
         // call backend API to create thread
         try {
-            const payload = {
-                title,
-                content,
-                categoryId: Number(categoryId),
-                userId: uid,
-            };
-
-            const created = await createThread({ title, content, categoryId: Number(categoryId), userId: uid });
+            // pass token from AuthProvider to ensure Authorization header is sent
+            const created = await createThread({ title, content, categoryId: Number(categoryId), userId: uid }, token);
 
             // map backend response to UI thread shape
             const id = created.thread_id ?? created.threadId ?? created.id ?? Date.now();
@@ -102,15 +140,19 @@ export default function ForumDashboard() {
                 createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
             };
 
-            // prepend to recentThreads
-            setRecentThreads((prev) => [newThread, ...prev].slice(0, 20)); // keep last 20
-
-            // increment category threads count
-            setCategories((prevCats) =>
-                prevCats.map((c) =>
-                    c.id === Number(catId) ? { ...c, threads: (c.threads || 0) + 1 } : c
-                )
-            );
+            // After successful create, re-load threads for current search (keeps counts consistent)
+            try {
+                await loadThreads(searchQuery);
+            } catch (e) {
+                // fallback: at least prepend so UI feels responsive
+                setRecentThreads((prev) => [newThread, ...prev].slice(0, 20)); // keep last 20
+                setCategories((prevCats) =>
+                    prevCats.map((c) =>
+                        c.id === Number(catId) ? { ...c, threads: (c.threads || 0) + 1 } : c
+                    )
+                );
+                setStats(prev => prev.map(s => s.id === 1 ? { ...s, value: (Number(s.value) || 0) + 1 } : s));
+            }
 
             setModalOpen(false);
         } catch (err) {
@@ -122,41 +164,13 @@ export default function ForumDashboard() {
 
     // fetch threads on mount
     useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            setLoadingThreads(true);
-            setThreadsError('');
-            try {
-                const data = await getThreads();
-                if (cancelled) return;
-
-                // data expected to be an array of thread rows from backend
-                const mapped = (Array.isArray(data) ? data : []).map((t) => {
-                    const id = t.thread_id ?? t.threadId ?? t.id;
-                    const catId = t.category_id ?? t.categoryId ?? t.categoryId;
-                    const userId = t.user_id ?? t.userId ?? t.userId;
-                    const createdAt = t.created_at ?? t.createdAt ?? new Date().toISOString();
-                    return {
-                        id,
-                        title: t.title,
-                        categoryId: Number(catId || 0),
-                        categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
-                        content: t.content,
-                        author: t.username ?? `User ${userId ?? ''}`,
-                        createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
-                    };
-                });
-
-                setRecentThreads(mapped);
-            } catch (e) {
-                console.error('Failed to load threads', e);
-                setThreadsError(e?.message || 'Failed to load threads from server');
-            } finally {
-                setLoadingThreads(false);
+        loadThreads();
+        return () => {
+            if (searchTimerRef.current) {
+                clearTimeout(searchTimerRef.current);
+                searchTimerRef.current = null;
             }
-        }
-        load();
-        return () => { cancelled = true; };
+        };
     }, []); // run once on mount
 
     return (
@@ -168,7 +182,21 @@ export default function ForumDashboard() {
                     <h1 className="fd-title">Forum Community <span className="fd-beta">Beta</span></h1>
                 </div>
                 <div className="fd-actions" style={{ position: 'relative' }}>
-                    <input className="fd-search" placeholder="Search threads..." />
+                    <input
+                        className="fd-search"
+                        placeholder="Search threads..."
+                        value={searchQuery}
+                        onChange={(e) => {
+                            const v = e.target.value;
+                            setSearchQuery(v);
+                            // debounce 300ms
+                            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                            searchTimerRef.current = setTimeout(() => {
+                                loadThreads(v);
+                                searchTimerRef.current = null;
+                            }, 300);
+                        }}
+                    />
                     {!user ? (
                         <>
                             <Link to="/login" className="fd-btn">Sign In</Link>
@@ -252,36 +280,10 @@ export default function ForumDashboard() {
                                 <div>Error loading threads: {threadsError}</div>
                                 <div style={{ marginTop: 8 }}>
                                     <button className="fd-btn" onClick={() => {
-                                        // retry by reloading the component effect (quick way)
+                                        // retry using the same loadThreads helper and current search query
                                         setRecentThreads([]);
                                         setThreadsError('');
-                                        setLoadingThreads(true);
-                                        // call getThreads again
-                                        (async () => {
-                                            try {
-                                                const data = await getThreads();
-                                                const mapped = (Array.isArray(data) ? data : []).map((t) => {
-                                                    const id = t.thread_id ?? t.threadId ?? t.id;
-                                                    const catId = t.category_id ?? t.categoryId ?? t.categoryId;
-                                                    const userId = t.user_id ?? t.userId ?? t.userId;
-                                                    const createdAt = t.created_at ?? t.createdAt ?? new Date().toISOString();
-                                                    return {
-                                                        id,
-                                                        title: t.title,
-                                                        categoryId: Number(catId || 0),
-                                                        categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
-                                                        content: t.content,
-                                                        author: t.username ?? `User ${userId ?? ''}`,
-                                                        createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
-                                                    };
-                                                });
-                                                setRecentThreads(mapped);
-                                            } catch (e) {
-                                                setThreadsError(e?.message || 'Failed to load threads');
-                                            } finally {
-                                                setLoadingThreads(false);
-                                            }
-                                        })();
+                                        loadThreads(searchQuery);
                                     }}>Retry</button>
                                 </div>
                             </div>

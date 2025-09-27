@@ -50,7 +50,7 @@ async function tryFetch(url, options = {}) {
     if (!options.headers['Accept'] && !options.headers['Content-Type']) {
         options.headers['Accept'] = 'application/json';
     }
-    // merge Authorization if present
+    // merge Authorization if present in localStorage
     const extraHeaders = makeHeaders(options.headers['Content-Type'] === 'application/json');
     options.headers = { ...extraHeaders, ...options.headers };
 
@@ -63,8 +63,10 @@ async function tryFetch(url, options = {}) {
     }
 }
 
-export async function getThreads() {
-    const paths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
+export async function getThreads(q = null) {
+    // accept optional search query `q` — append as ?q=... to the candidate paths
+    const basePaths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
+    const paths = (q && q.toString().trim()) ? basePaths.map(p => `${p}?q=${encodeURIComponent(q.toString().trim())}`) : basePaths;
     let lastError = null;
     for (const url of paths) {
         try {
@@ -81,7 +83,8 @@ export async function getThreads() {
 }
 
 // payload: { title, content, categoryId, userId }
-export async function createThread({ title, content, categoryId, userId }) {
+// token: optional JWT string to use instead of localStorage
+export async function createThread({ title, content, categoryId, userId }, token = null) {
     if (!title || !content) throw new Error('title and content are required');
 
     const body = {
@@ -102,31 +105,28 @@ export async function createThread({ title, content, categoryId, userId }) {
     let lastError = null;
     for (const url of paths) {
         try {
+            // prepare headers
+            const headers = { 'Content-Type': 'application/json' };
+            // if token provided as argument, use it; otherwise let tryFetch merge from localStorage
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             // call server
             const res = await tryFetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(body),
             });
 
             // normalize common response envelopes
-            // possible shapes:
-            // 1) created thread object directly -> res
-            // 2) { thread: { ... } }
-            // 3) { data: { thread: { ... } } } or { data: {...} }
-            // 4) { success: true, thread: {...} }
             if (!res) return res;
             if (res.thread) return res.thread;
             if (res.data) {
-                // data might be array or object
                 if (Array.isArray(res.data) && res.data.length > 0) return res.data[0];
                 if (res.data.thread) return res.data.thread;
                 return res.data;
             }
-            // sometimes backend returns { result: {...} }
             if (res.result) return res.result;
 
-            // otherwise assume res itself is the created thread
             return res;
         } catch (e) {
             lastError = e;

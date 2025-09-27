@@ -12,6 +12,14 @@ export function AuthProvider({ children }) {
         }
     });
 
+    const [token, setToken] = useState(() => {
+        try {
+            return localStorage.getItem('token') || null;
+        } catch (e) {
+            return null;
+        }
+    });
+
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
@@ -19,6 +27,14 @@ export function AuthProvider({ children }) {
             localStorage.removeItem('user');
         }
     }, [user]);
+
+    useEffect(() => {
+        if (token) {
+            try { localStorage.setItem('token', token); } catch (e) { /* ignore */ }
+        } else {
+            localStorage.removeItem('token');
+        }
+    }, [token]);
 
     const login = (userInfo) => {
         // Ensure joinDate exists (set to now if not provided)
@@ -29,11 +45,18 @@ export function AuthProvider({ children }) {
             joinDate: (userInfo && userInfo.joinDate) || (user && user.joinDate) || now,
         };
         setUser(merged);
+        // if token provided inside userInfo, store it in context/localStorage
+        if (userInfo && userInfo.token) {
+            setToken(userInfo.token);
+        }
     };
-    const logout = () => setUser(null);
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

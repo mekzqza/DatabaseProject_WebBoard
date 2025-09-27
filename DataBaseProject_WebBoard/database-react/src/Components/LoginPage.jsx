@@ -25,37 +25,23 @@ function LoginPage() {
         try {
             const data = await sendLogin({ username, password });
 
-            // show server message if any
-            if (data && typeof data === 'object') {
-                setOut(data.message || '');
+            // if login failed, show message
+            if (!data || !data.status) {
+                setOut(data?.message || 'Login failed. Please check your credentials.');
+                return;
             }
 
-            // If login is successful, navigate to /
-            // API returns { status: true/false, message: ... }
-            if (data && data.status) {
-                // set simple client-side auth state so header shows profile
-                try {
-                    // include any id/user_id/userId returned by the server so we can pass user id when creating threads
-                    const uid = data.user_id ?? data.id ?? data.userId ?? undefined;
-                    const userObj = { username: data.username || username, email: data.email || '' };
-                    if (uid !== undefined) userObj.id = uid;
-                    // store token if backend returned one (name variations handled)
-                    const token = data.token ?? data.accessToken ?? data.access_token ?? undefined;
-                    if (token) {
-                        try { localStorage.setItem('token', token); } catch(e) { /* ignore */ }
-                        userObj.token = token;
-                    }
-                    login(userObj);
-                } catch (e) {
-                    // ignore
-                }
-                navigate("/");
-            } else {
-                // keep out message set above or show default
-                if (!data || !data.message) setOut("Login failed. Please check your credentials.");
-            }
+            // If login successful, data should include token and user
+            const token = data.token ?? data.accessToken ?? data.access_token;
+            const userObj = data.user ?? { username: data.username || username };
+
+            // Call context login which will persist user and token
+            login({ ...userObj, username: userObj.username || username, token });
+
+            // navigate to home
+            navigate('/');
         } catch (err) {
-            setOut("Error: " + err.message);
+            setOut("Error: " + (err.message || err));
         } finally {
             setLoading(false);
         }

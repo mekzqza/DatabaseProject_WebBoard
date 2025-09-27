@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
+import { updateUser, getUser } from './APIs/api';
 import './CssStore/edit-profile.css';
 
 export default function EditProfile() {
-    const { user, login } = useAuth();
+    const { user, login, token } = useAuth();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState(user?.username || '');
@@ -48,18 +49,34 @@ export default function EditProfile() {
         }
         setSaving(true);
         try {
-            // Update client-side user (would call API in real app)
-            const updated = {
-                ...user,
-                username,
-                email,
-                bio,
-                avatarUrl: avatarPreview || undefined,
+            // Prepare payload for backend. Ensure we send an id (user_id or id)
+            const id = user?.user_id ?? user?.id ?? user?.userId;
+            if (!id) {
+                setError('ไม่พบรหัสผู้ใช้ (id) เพื่ออัปเดต');
+                setSaving(false);
+                return;
+            }
+
+            const payload = {
+                // backend helper accepts user.id or user.user_id; updateUser maps to user_id
+                user_id: id,
+                username: username,
+                email: email,
+                bio: bio,
+                // use avatarPreview (DataURL) if present, otherwise send null to clear
+                avatar_url: avatarPreview || null,
             };
-            login(updated);
+
+            // send token explicitly so backend auth middleware accepts it
+            await updateUser(payload, token);
+
+            // fetch updated user from backend to get canonical fields
+            const fresh = await getUser(id, token);
+            const merged = { ...(user || {}), ...(fresh || {}), avatarUrl: (fresh && (fresh.avatar_url || fresh.avatarUrl)) || avatarPreview || '' };
+            login(merged);
             navigate('/profile');
         } catch (err) {
-            setError('เกิดข้อผิดพลาด');
+            setError(err && err.message ? err.message : String(err) || 'เกิดข้อผิดพลาด');
         } finally {
             setSaving(false);
         }

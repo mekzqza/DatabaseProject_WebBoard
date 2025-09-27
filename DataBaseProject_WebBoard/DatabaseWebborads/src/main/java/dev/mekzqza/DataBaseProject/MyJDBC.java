@@ -14,7 +14,9 @@ public  class MyJDBC {
     String username = "root";  // ชื่อผู้ใช้ฐานข้อมูล
     String dbPassword = "mek0934396759";  // รหัสผ่านฐานข้อมูล
 
-
+    private Connection connectDatabase() throws SQLException {
+        return DriverManager.getConnection(url, username, dbPassword);
+    }
 
     public Map<String ,String> sQlSeLect(String command){
         Map<String,String > userCredentials = new HashMap<>();
@@ -438,8 +440,6 @@ public  class MyJDBC {
         }
     }
 
-    public static void main(String[] args) {
 
-   }
 
 }

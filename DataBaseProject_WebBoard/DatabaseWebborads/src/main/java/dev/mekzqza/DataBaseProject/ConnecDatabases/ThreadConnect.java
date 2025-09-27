@@ -5,6 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ThreadConnect {
@@ -57,5 +61,91 @@ public class ThreadConnect {
         return -1;  // คืนค่าผิดปกติหากเกิดข้อผิดพลาด
     }
 
+
+    /**
+     * Read all threads from the `threads` table and return as a list of ThreadRow objects.
+     */
+    public List<ThreadRow> getAllThreads() {
+        String sql = "SELECT thread_id, category_id, user_id, title, content, created_at, updated_at FROM threads ORDER BY created_at DESC";
+        List<ThreadRow> list = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(url, username, dbPassword);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                long threadId = rs.getLong("thread_id");
+                long categoryId = rs.getLong("category_id");
+                long userId = rs.getLong("user_id");
+                String title = rs.getString("title");
+                String content = rs.getString("content");
+                Timestamp cts = rs.getTimestamp("created_at");
+                Timestamp uts = rs.getTimestamp("updated_at");
+                LocalDateTime createdAt = cts != null ? cts.toLocalDateTime() : null;
+                LocalDateTime updatedAt = uts != null ? uts.toLocalDateTime() : null;
+
+                ThreadRow row = new ThreadRow(threadId, categoryId, userId, title, content, createdAt, updatedAt);
+                list.add(row);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Simple POJO to hold a thread row returned by getAllThreads().
+     */
+    public static class ThreadRow {
+        private final long threadId;
+        private final long categoryId;
+        private final long userId;
+        private final String title;
+        private final String content;
+        private final LocalDateTime createdAt;
+        private final LocalDateTime updatedAt;
+
+        public ThreadRow(long threadId, long categoryId, long userId, String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+            this.threadId = threadId;
+            this.categoryId = categoryId;
+            this.userId = userId;
+            this.title = title;
+            this.content = content;
+            this.createdAt = createdAt;
+            this.updatedAt = updatedAt;
+        }
+
+        public long getThreadId() { return threadId; }
+        public long getCategoryId() { return categoryId; }
+        public long getUserId() { return userId; }
+        public String getTitle() { return title; }
+        public String getContent() { return content; }
+        public LocalDateTime getCreatedAt() { return createdAt; }
+        public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+        @Override
+        public String toString() {
+            return "ThreadRow{" +
+                    "threadId=" + threadId +
+                    ", categoryId=" + categoryId +
+                    ", userId=" + userId +
+                    ", title='" + title + '\'' +
+                    ", createdAt=" + createdAt +
+                    ", updatedAt=" + updatedAt +
+                    '}';
+        }
+    }
+
+    // add a small main() to demonstrate getAllThreads()
+//    public static void main(String[] args) {
+//
+//        ThreadConnect tc = new ThreadConnect();
+//        System.out.println("Fetching threads from DB...");
+//        List<ThreadRow> threads = tc.getAllThreads();
+//        System.out.println("Found " + threads.size() + " threads:");
+//        for (ThreadRow r : threads) {
+//            System.out.println(r);
+//        }
+//    }
 
 }

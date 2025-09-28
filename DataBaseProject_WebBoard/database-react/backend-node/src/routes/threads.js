@@ -25,6 +25,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/threads/:id - single thread
+router.get('/:id', async (req, res) => {
+  const id = req.params.id;
+  if (!id) return res.status(400).json({ status: false, message: 'id is required' });
+  try {
+    const sql = `SELECT t.thread_id, t.category_id, t.user_id, u.username, t.title, t.content, t.created_at, t.updated_at FROM threads t LEFT JOIN users u ON t.user_id = u.user_id WHERE t.thread_id = ? LIMIT 1`;
+    const [rows] = await pool.query(sql, [id]);
+    if (!rows || rows.length === 0) return res.status(404).json({ status: false, message: 'Thread not found' });
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
 // POST /api/threads (create new thread) - requires auth
 router.post('/', auth, async (req, res) => {
   const { title, content, category_id } = req.body || {};

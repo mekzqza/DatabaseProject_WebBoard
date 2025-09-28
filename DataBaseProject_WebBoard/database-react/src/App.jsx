@@ -9,6 +9,7 @@ import SignUpPage from './Components/SignUpPage';
 import Profile from './Components/Profile';
 import EditProfile from './Components/EditProfile';
 import ForgotPassword from './Components/ForgotPassword';
+import ThreadView from './Components/ThreadView';
 
 export default function App() {
     return (
@@ -21,6 +22,7 @@ export default function App() {
                     <Route path="/forgotpassword" element={<ForgotPassword />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
+                    <Route path="/thread/:id" element={<ThreadView />} />
                 </Routes>
             </Router>
         </AuthProvider>

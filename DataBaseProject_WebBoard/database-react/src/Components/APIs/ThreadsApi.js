@@ -2,7 +2,7 @@
 // Uses same base as other API helpers
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 const USE_CREDENTIALS = (process.env.REACT_APP_API_INCLUDE_CREDENTIALS === 'true');
-///Test commit form 
+///Test commit form vscodes
 
 function makeHeaders(isJson = true) {
     const headers = {};
@@ -136,6 +136,24 @@ export async function createThread({ title, content, categoryId, userId }, token
     }
 
     const err = new Error(lastError?.message || 'Failed to create thread');
+    err.cause = lastError;
+    throw err;
+}
+
+// fetch a single thread by id
+export async function getThreadById(id) {
+    if (!id && id !== 0) throw new Error('id is required');
+    const basePaths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
+    let lastError = null;
+    for (const base of basePaths) {
+        const url = `${base}/${encodeURIComponent(id)}`;
+        try {
+            return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        } catch (e) {
+            lastError = e;
+        }
+    }
+    const err = new Error(lastError?.message || 'Failed to fetch thread');
     err.cause = lastError;
     throw err;
 }

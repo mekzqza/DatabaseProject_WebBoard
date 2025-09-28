@@ -3,25 +3,25 @@ const router = express.Router();
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
-const redis = require('../redisClient');
+const cache = require('../cache');
 
 // GET /api/users
 router.get('/', async (req, res) => {
   try {
     const cacheKey = 'users:all';
     try {
-      const cached = await redis.get(cacheKey);
-      if (cached) return res.json(JSON.parse(cached));
+      const cached = await cache.getJson(cacheKey);
+      if (cached) return res.json(cached);
     } catch (cacheErr) {
-      console.error('Redis GET error (users list)', cacheErr);
+      console.error('cache.getJson error (users list)', cacheErr);
     }
 
     const [rows] = await pool.query('SELECT user_id, username, email, avatar_url, bio, social_links, role, created_at, updated_at FROM users');
 
     try {
-      await redis.set(cacheKey, JSON.stringify(rows), { EX: 300 });
+      await cache.setJson(cacheKey, rows);
     } catch (cacheErr) {
-      console.error('Redis SET error (users list)', cacheErr);
+      console.error('cache.setJson error (users list)', cacheErr);
     }
 
     return res.json(rows);
@@ -37,19 +37,19 @@ router.get('/:id', async (req, res) => {
   try {
     const cacheKey = `user:${id}`;
     try {
-      const cached = await redis.get(cacheKey);
-      if (cached) return res.json(JSON.parse(cached));
+      const cached = await cache.getJson(cacheKey);
+      if (cached) return res.json(cached);
     } catch (cacheErr) {
-      console.error('Redis GET error (user)', cacheErr);
+      console.error('cache.getJson error (user)', cacheErr);
     }
 
     const [rows] = await pool.query('SELECT user_id, username, email, avatar_url, bio, social_links, role, created_at, updated_at FROM users WHERE user_id = ? LIMIT 1', [id]);
     if (!rows || rows.length === 0) return res.status(404).json({ status: false, message: 'User not found' });
 
     try {
-      await redis.set(cacheKey, JSON.stringify(rows[0]), { EX: 300 });
+      await cache.setJson(cacheKey, rows[0]);
     } catch (cacheErr) {
-      console.error('Redis SET error (user)', cacheErr);
+      console.error('cache.setJson error (user)', cacheErr);
     }
 
     return res.json(rows[0]);
@@ -186,20 +186,19 @@ router.post('/', async (req, res) => {
     const [result] = await pool.query('INSERT INTO users (username, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)', [username, email || null, hashed, now, now]);
     // set username/email quick-check keys and invalidate users cache
     try {
-      if (username) await redis.set(`username:${username.toLowerCase()}`, '1', { EX: 86400 });
-      if (email) await redis.set(`email:${email.toLowerCase()}`, '1', { EX: 86400 });
+      if (username) await cache.setJson(`username:${username.toLowerCase()}`, '1', 86400);
+      if (email) await cache.setJson(`email:${email.toLowerCase()}`, '1', 86400);
     } catch (cacheErr) {
-      console.error('Redis SET error (username/email cache)', cacheErr);
+      console.error('cache.setJson error (username/email cache)', cacheErr);
     }
 
-    // invalidate users cache
+    // invalidate users cache keys
     try {
-      const keys = await redis.keys('users*');
-      if (keys.length) {
-        await Promise.all(keys.map(k => redis.del(k)));
-      }
+      await cache.del('users:all');
+      // also remove user specific cache if exists
+      await cache.del(`user:${result.insertId}`);
     } catch (cacheErr) {
-      console.error('Redis DEL/KEYS error (users)', cacheErr);
+      console.error('cache.del error (users)', cacheErr);
     }
 
     return res.status(201).json({ status: true, user_id: result.insertId, username });
@@ -252,11 +251,10 @@ router.put('/:id', auth, async (req, res) => {
 
     // invalidate user cache for this id and users list
     try {
-      await redis.del(`user:${id}`);
-      const keys = await redis.keys('users*');
-      if (keys.length) await Promise.all(keys.map(k => redis.del(k)));
+      await cache.del(`user:${id}`);
+      await cache.del('users:all');
     } catch (cacheErr) {
-      console.error('Redis DEL error (users update)', cacheErr);
+      console.error('cache.del error (users update)', cacheErr);
     }
 
     // manage username/email quick-check cache keys

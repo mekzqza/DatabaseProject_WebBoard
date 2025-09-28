@@ -224,6 +224,15 @@ router.delete('/:id', auth, async (req, res) => {
         console.error('Redis DEL error (threads delete)', cacheErr);
       }
 
+      // invalidate reports caches too (if any)
+      try {
+        const reportsTable = process.env.REPORTS_TABLE || 'reports';
+        await require('../cache').del(`${reportsTable}:list`);
+        await require('../cache').del(`${reportsTable}:id:${id}`);
+      } catch (e) {
+        console.error('Failed to invalidate reports cache after thread delete', e);
+      }
+
       return res.json({ status: true });
     } catch (txErr) {
       try { await conn.rollback(); } catch (e) { /* ignore */ }

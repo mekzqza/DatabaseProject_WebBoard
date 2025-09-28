@@ -40,6 +40,27 @@ export default function ThreadView() {
     const [reportMessage, setReportMessage] = useState('');
     const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 
+    async function deleteThread() {
+        if (!window.confirm('Delete this thread? This cannot be undone.')) return;
+        try {
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(`${API_BASE}/api/threads/${encodeURIComponent(id)}`, { method: 'DELETE', headers });
+            if (!res.ok) {
+                let body = null;
+                try { body = await res.json(); } catch (e) { body = await res.text().catch(() => null); }
+                const msg = body && body.message ? body.message : (typeof body === 'string' ? body : `HTTP ${res.status}`);
+                alert('Failed to delete thread: ' + msg);
+                return;
+            }
+            // success — navigate back to home
+            navigate('/');
+        } catch (e) {
+            console.error('Delete thread failed', e);
+            alert('Failed to delete thread: ' + (e.message || e));
+        }
+    }
+
     return (
         <div className="tv-page">
             <button className="tv-home-btn" onClick={() => navigate('/')}>Home</button>
@@ -59,7 +80,10 @@ export default function ThreadView() {
                             </div>
                             <div className="tv-actions">
                                 {canEdit && (
-                                    <button className="tv-btn" onClick={() => setEditMode((s) => !s)}>{editMode ? 'Cancel' : 'Edit'}</button>
+                                    <>
+                                        <button className="tv-btn" onClick={() => setEditMode((s) => !s)}>{editMode ? 'Cancel' : 'Edit'}</button>
+                                        <button className="tv-btn tv-btn-danger" onClick={deleteThread} style={{ marginLeft: 8 }}>Delete</button>
+                                    </>
                                 )}
                                 {canReport && (
                                     <button className="tv-btn" onClick={() => { setReportOpen(true); setReportMessage(''); setReportReason(''); }}>Report</button>

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
+const cache = require('../cache');
 const REPORTS_TABLE = process.env.REPORTS_TABLE || 'reports';
 
 // helper admin guard
@@ -43,7 +44,7 @@ router.post('/', auth, async (req, res) => {
       return res.status(409).json({ status: false, message: 'You already reported this thread' });
     }
 
-    const conn = await pool.getConnection();
+  const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
       const now = new Date();
@@ -66,6 +67,8 @@ router.post('/', auth, async (req, res) => {
       }
       await conn.commit();
       conn.release();
+  // invalidate reports list cache
+  try { await cache.del(`${REPORTS_TABLE}:list`); } catch (e) { }
       return res.status(201).json({ status: true, report_id: result.insertId, user_id: reporterId });
     } catch (txErr) {
       await conn.rollback();
@@ -89,6 +92,9 @@ router.get('/', auth, requireAdmin, async (req, res) => {
   const offset = Number(req.query.offset || 0);
   try {
   const table = REPORTS_TABLE || 'reports';
+  const cacheKey = `${table}:list:${status || 'all'}:${limit}:${offset}`;
+  const cached = await cache.getJson(cacheKey);
+  if (cached) return res.json(cached);
   // Select report fields, reporter info, and thread details (title, content, author info)
   let sql = `SELECT r.report_id,
         r.thread_id,
@@ -115,6 +121,7 @@ router.get('/', auth, requireAdmin, async (req, res) => {
     sql += ' ORDER BY r.created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     const [rows] = await pool.query(sql, params);
+    try { await cache.setJson(cacheKey, rows); } catch (e) {}
     return res.json(rows);
   } catch (err) {
     console.error('List reports error', err);
@@ -127,6 +134,9 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
   const table = REPORTS_TABLE || 'reports';
+  const cacheKey = `${table}:id:${id}`;
+  const cached = await cache.getJson(cacheKey);
+  if (cached) return res.json(cached);
   const q = `SELECT r.report_id,
             r.thread_id,
             r.user_id AS reporter_user_id,
@@ -147,6 +157,7 @@ router.get('/:id', auth, requireAdmin, async (req, res) => {
          WHERE r.report_id = ? LIMIT 1`;
   const [rows] = await pool.query(q, [id]);
   if (!rows || rows.length === 0) return res.status(404).json({ status: false, message: 'Report not found' });
+  try { await cache.setJson(cacheKey, rows[0]); } catch (e) {}
   return res.json(rows[0]);
   } catch (err) {
     console.error('Get report error', err);
@@ -169,6 +180,9 @@ router.put('/:id', auth, requireAdmin, async (req, res) => {
   const sql = `UPDATE ${table} SET ${fields.join(', ')} WHERE report_id = ?`;
   try {
     const [result] = await pool.query(sql, params);
+    // invalidate cache for this report and list
+    try { await cache.del(`${REPORTS_TABLE}:id:${id}`); } catch (e) {}
+    try { await cache.del(`${REPORTS_TABLE}:list`); } catch (e) {}
     return res.json({ status: true, affectedRows: result.affectedRows });
   } catch (err) {
     console.error('Update report error', err);

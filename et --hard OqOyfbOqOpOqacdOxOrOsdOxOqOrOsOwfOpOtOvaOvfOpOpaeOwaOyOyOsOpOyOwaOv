@@ -1,0 +1,47 @@
+[33m19fb101[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m เปลี่ยนจาก java backend มาใช้ javascript มันทำงานได้ดี ตอนนี้ถึงค้นหา threadละ
+[33m4c989fd[m ส่ง userId ให้ไปสร้าง threads
+[33mef7b7bf[m แสดง Threads ออกfornend เสร้จ
+[33m99c5314[m Api all thread backend successfull
+[33m2b06961[m ADD new thread successfull
+[33m20834cc[m New
+[33md930e1f[m add api backend
+[33m4499a37[m add fogotpasswordPage
+[33m785172a[m Merge remote-tracking branch 'origin/master'
+[33mc3db08d[m check point from branch 0d7fe6ac-7f4a-4f3d-8e2b-5e6f3c9e6a1b  แก้ไข้ Forntend สำเร็จ เหลือthread
+[33m1a60cff[m[33m ([m[1;31morigin/restore-0d7fe6a[m[33m, [m[1;32mrestore-0d7fe6a[m[33m)[m แก้ไข้ Forntend สำเร็จ เหลือthread
+[33ma918d4c[m login และ singup เสร้จแล้ว
+[33ma06c887[m เพิ่ม datamodel เพื่อเตียนมามช้งาน cache
+[33mf298376[m Merge pull request #3 from mekzqza/restore-0d7fe6a
+[33mfe5ad6c[m test new git push master
+[33m0d7fe6a[m ลง dependencry เพื่อเตรียมทำ threads
+[33m5948006[m ปรับแต่ง login singup dashboards เสร้จ backend fornt ทำงานได้ปรกติ
+[33mcc1b784[m เพิ่ม ForumDashboard และลบ dashborads เก่าออก
+[33mb726040[m loginPage&singupPage loggreattt
+[33m37f419b[m ืทำหน้าล้อคอินให้ premiere pro
+[33m82fc2ba[m เตรียมตัวทำ Servercache เพื่อใช้เก็บเป็น ข้อมูลสดไว้รันในโค้ด
+[33ma8c9832[m LOGINPAGE SINGUP DONEEEEEEEEEEEE
+[33m4aa09c4[m หลักตอนนี้ 9/23/2025  :workkkkkkkkkkkkkkk
+[33mfb615f2[m หลักตอนนี้ 9/23/2025
+[33m7c34306[m[33m ([m[1;31morigin/detached2[m[33m)[m Add CacheServer และ refactor Users to user
+[33m31c30b6[m สิ่งที่ต้องทำต่อไป public  2 locallhosts เข้าด้วยกัน
+[33m0f11035[m list เตือนสติตัวเอง อย่าลืมเพิ่ม cache server และ เพิ่ม Newusers ลง dataBase Table:user
+[33m25a181f[m none
+[33ma329b92[m ส่งข้อมูล user,password successfull ไปกับFedn Bend แสดงหน้า console ได้ส้ำเร็จวผ่าน locallhost:8080/api/submit
+[33me569de2[m remove proxy "proxy": "http://localhost:8080"
+[33m0c522d3[m add proxy "proxy": "http://localhost:8080"
+[33mfa85dc2[m สร้าง @GetMapping("/api/message") ส่งข้อมูลไปหน้าfronend ส้ำเร้จ ลืมเอามาเพิ่มใช้คู่กับ commit ก่อนหน้านี้
+[33m0fe6301[m สร้าง @GetMapping("/api/message") ส่งข้อมูลไปหน้าfronend ส้ำเร้จ
+[33mba7ba02[m firstcommit-react
+[33m83afdd3[m สร้าง class Users เพื่อไว้ทำ cahsในอนาคต + เขียนอธิบายทำความเข้าใจ fetch ของjavascript นิดหน่อย
+[33md232397[m แยกApicontroller ออกจาก WebprojectApplication
+[33m065da0c[m ส่งขอมูลFend =(name,password)=> path locolhost:8080/api/submit  โดย เข้าlocolhost:8080/form.html success full โดยรวม data(name,password)Fend  =>  Bend ผ่าน class ApiContoller
+[33mb8ce515[m java =(data)>> javascript path 8080/api/hello   jason
+[33m7d17846[m first with IntelliJ untimate
+[33mfb91df4[m first with IntelliJ untimate
+[33mfa1c872[m Add new User is user Table success full
+[33m9bfbeb6[m Add new User is user Table success full
+[33m3859183[m dataBase And code is connect success fUll
+[33m2f90c30[m ad55
+[33m8e58b98[m ad
+[33me76398a[m ad
+[33m065402a[m fistCommit

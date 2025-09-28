@@ -44,6 +44,7 @@ router.post('/', auth, async (req, res) => {
     console.error(err);
     return res.status(500).json({ status: false, message: 'Internal server error' });
   }
+  
 });
 
 module.exports = router;

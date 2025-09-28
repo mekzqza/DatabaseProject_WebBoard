@@ -4,6 +4,18 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const redis = require('../redisClient');
 
+// helper to resolve role (JWT may or may not include it)
+async function resolveUserRole(userId) {
+  try {
+    if (!userId) return null;
+    const [rows] = await pool.query('SELECT role FROM users WHERE user_id = ? LIMIT 1', [userId]);
+    if (rows && rows.length > 0) return rows[0].role;
+  } catch (e) {
+    console.error('resolveUserRole error', e);
+  }
+  return null;
+}
+
 // GET /api/threads
 router.get('/', async (req, res) => {
   // join users to include username
@@ -159,6 +171,68 @@ router.put('/:id', auth, async (req, res) => {
     return res.json(updatedRows[0]);
   } catch (err) {
     console.error(err);
+    return res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
+// DELETE /api/threads/:id - delete a thread (owner or admin)
+router.delete('/:id', auth, async (req, res) => {
+  const id = req.params.id;
+  const userId = req.user && req.user.user_id;
+  if (!id) return res.status(400).json({ status: false, message: 'id is required' });
+  if (!userId) return res.status(401).json({ status: false, message: 'Invalid user' });
+
+  try {
+    console.log('DELETE /api/threads/:id called', { id, userId, role: req.user && req.user.role });
+    // get owner
+    const [rows] = await pool.query('SELECT thread_id, user_id FROM threads WHERE thread_id = ? LIMIT 1', [id]);
+    console.log('Delete select result rows.length=', (rows && rows.length));
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ status: false, message: 'Thread not found (no row)', thread_id: id });
+    }
+    const ownerId = rows[0].user_id;
+
+    // allow if owner or admin
+    let isAdmin = false;
+    if (req.user && req.user.role && String(req.user.role).toLowerCase() === 'admin') isAdmin = true;
+    if (!isAdmin) {
+      const role = await resolveUserRole(userId);
+      if (role && String(role).toLowerCase() === 'admin') isAdmin = true;
+    }
+
+    if (Number(ownerId) !== Number(userId) && !isAdmin) {
+      return res.status(403).json({ status: false, message: 'Forbidden. Only owner or admin can delete.' });
+    }
+
+    // delete dependent reports (and other dependent rows if needed) in a transaction
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      // remove reports referencing this thread to satisfy FK constraints
+      await conn.query('DELETE FROM reports WHERE thread_id = ?', [id]);
+      // TODO: if you have replies/comments/attachments tables, delete them here too
+      await conn.query('DELETE FROM threads WHERE thread_id = ?', [id]);
+      await conn.commit();
+      conn.release();
+
+      // invalidate cache for this thread and thread lists
+      try {
+        await redis.del(`thread:${id}`);
+        const keys = await redis.keys('threads*');
+        if (keys.length) await Promise.all(keys.map(k => redis.del(k)));
+      } catch (cacheErr) {
+        console.error('Redis DEL error (threads delete)', cacheErr);
+      }
+
+      return res.json({ status: true });
+    } catch (txErr) {
+      try { await conn.rollback(); } catch (e) { /* ignore */ }
+      try { conn.release(); } catch (e) { /* ignore */ }
+      console.error('Delete thread transaction error', txErr);
+      return res.status(500).json({ status: false, message: 'Failed to delete thread' });
+    }
+  } catch (err) {
+    console.error('Delete thread error', err);
     return res.status(500).json({ status: false, message: 'Internal server error' });
   }
 });

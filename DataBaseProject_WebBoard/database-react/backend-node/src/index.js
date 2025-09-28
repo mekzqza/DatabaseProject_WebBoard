@@ -18,6 +18,7 @@ const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const threadsRoutes = require('./routes/threads');
 const presenceRoutes = require('./routes/presence');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/threads', threadsRoutes);
 app.use('/api/online', presenceRoutes);
+app.use('/api/reports', reportsRoutes);
 
 app.get('/health', (req, res) => res.json({ status: true }));
 

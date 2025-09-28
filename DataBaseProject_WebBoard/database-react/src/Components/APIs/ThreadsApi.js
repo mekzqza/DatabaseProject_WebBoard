@@ -157,3 +157,23 @@ export async function getThreadById(id) {
     err.cause = lastError;
     throw err;
 }
+
+// update a thread by id (requires auth)
+export async function updateThread(id, payload = {}, token = null) {
+    if (!id && id !== 0) throw new Error('id is required');
+    const paths = [`${API_BASE}/threads/${encodeURIComponent(id)}`, `${API_BASE}/api/threads/${encodeURIComponent(id)}`];
+    let lastError = null;
+    for (const url of paths) {
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await tryFetch(url, { method: 'PUT', headers, body: JSON.stringify(payload) });
+            return res;
+        } catch (e) {
+            lastError = e;
+        }
+    }
+    const err = new Error(lastError?.message || 'Failed to update thread');
+    err.cause = lastError;
+    throw err;
+}

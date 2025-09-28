@@ -8,6 +8,7 @@ const { body, validationResult } = require('express-validator');
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 10);
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_with_a_long_secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+const redis = require('../redisClient');
 
 // POST /api/register
 router.post('/register',
@@ -30,6 +31,14 @@ router.post('/register',
       const now = new Date();
       const insertSql = `INSERT INTO users (username, email, password_hash, avatar_url, bio, social_links, role, created_at, updated_at) VALUES (?, ?, ?, NULL, NULL, NULL, 'user', ?, ?)`;
       const [result] = await pool.query(insertSql, [username, email || null, hashed, now, now]);
+
+      // invalidate users cache so list will refresh
+      try {
+        const keys = await redis.keys('users*');
+        if (keys.length) await Promise.all(keys.map(k => redis.del(k)));
+      } catch (cacheErr) {
+        console.error('Redis DEL error (auth register)', cacheErr);
+      }
 
       return res.status(201).json({ status: true, message: 'User created', username });
     } catch (err) {

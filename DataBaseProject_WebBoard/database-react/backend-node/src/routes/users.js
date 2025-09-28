@@ -3,11 +3,27 @@ const router = express.Router();
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
+const redis = require('../redisClient');
 
 // GET /api/users
 router.get('/', async (req, res) => {
   try {
+    const cacheKey = 'users:all';
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) return res.json(JSON.parse(cached));
+    } catch (cacheErr) {
+      console.error('Redis GET error (users list)', cacheErr);
+    }
+
     const [rows] = await pool.query('SELECT user_id, username, email, avatar_url, bio, social_links, role, created_at, updated_at FROM users');
+
+    try {
+      await redis.set(cacheKey, JSON.stringify(rows), { EX: 300 });
+    } catch (cacheErr) {
+      console.error('Redis SET error (users list)', cacheErr);
+    }
+
     return res.json(rows);
   } catch (err) {
     console.error(err);
@@ -19,8 +35,23 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const id = req.params.id;
   try {
+    const cacheKey = `user:${id}`;
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) return res.json(JSON.parse(cached));
+    } catch (cacheErr) {
+      console.error('Redis GET error (user)', cacheErr);
+    }
+
     const [rows] = await pool.query('SELECT user_id, username, email, avatar_url, bio, social_links, role, created_at, updated_at FROM users WHERE user_id = ? LIMIT 1', [id]);
     if (!rows || rows.length === 0) return res.status(404).json({ status: false, message: 'User not found' });
+
+    try {
+      await redis.set(cacheKey, JSON.stringify(rows[0]), { EX: 300 });
+    } catch (cacheErr) {
+      console.error('Redis SET error (user)', cacheErr);
+    }
+
     return res.json(rows[0]);
   } catch (err) {
     console.error(err);
@@ -38,6 +69,17 @@ router.post('/', async (req, res) => {
     const hashed = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS || 10));
     const now = new Date();
     const [result] = await pool.query('INSERT INTO users (username, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)', [username, email || null, hashed, now, now]);
+
+    // invalidate users cache
+    try {
+      const keys = await redis.keys('users*');
+      if (keys.length) {
+        await Promise.all(keys.map(k => redis.del(k)));
+      }
+    } catch (cacheErr) {
+      console.error('Redis DEL/KEYS error (users)', cacheErr);
+    }
+
     return res.status(201).json({ status: true, user_id: result.insertId, username });
   } catch (err) {
     console.error(err);
@@ -76,6 +118,16 @@ router.put('/:id', auth, async (req, res) => {
   const sql = `UPDATE users SET ${fields.join(', ')}, updated_at = ? WHERE user_id = ?`;
   try {
     const [result] = await pool.query(sql, params);
+
+    // invalidate user cache for this id and users list
+    try {
+      await redis.del(`user:${id}`);
+      const keys = await redis.keys('users*');
+      if (keys.length) await Promise.all(keys.map(k => redis.del(k)));
+    } catch (cacheErr) {
+      console.error('Redis DEL error (users update)', cacheErr);
+    }
+
     return res.json({ status: true, message: 'User updated' });
   } catch (err) {
     console.error(err);

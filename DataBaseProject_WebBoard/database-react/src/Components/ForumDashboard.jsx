@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NewThreadModal from "./NewThreadModel";
 import "./CssStore/forumDashboard.css";
@@ -24,6 +24,7 @@ export default function ForumDashboard() {
     // make stats writable so we can update the Total Threads value
     const [stats, setStats] = useState(initialStats);
     const [categories, setCategories] = useState(initialCategories);
+    const categoriesRef = useRef(categories);
     const [searchQuery, setSearchQuery] = useState('');
     const [recentThreads, setRecentThreads] = useState([]); // newest first
     const [isModalOpen, setModalOpen] = useState(false);
@@ -31,8 +32,10 @@ export default function ForumDashboard() {
     const [showProfile, setShowProfile] = useState(false);
     const [loadingThreads, setLoadingThreads] = useState(false);
     const [threadsError, setThreadsError] = useState('');
+    const [onlineCount, setOnlineCount] = useState(null);
     const navigate = useNavigate();
     const searchTimerRef = React.useRef(null);
+    const onlineTimerRef = React.useRef(null);
 
     function openNewThread() {
         setModalOpen(true);
@@ -42,12 +45,13 @@ export default function ForumDashboard() {
     }
 
     // helper: load threads (optionally with search query q)
-    async function loadThreads(q = null) {
+    const loadThreads = useCallback(async (q = null) => {
         setLoadingThreads(true);
         setThreadsError('');
         try {
             const data = await getThreads(q);
             // data expected to be an array of thread rows from backend
+            const cats = categoriesRef.current || initialCategories;
             const mapped = (Array.isArray(data) ? data : []).map((t) => {
                 const id = t.thread_id ?? t.threadId ?? t.id;
                 const catId = t.category_id ?? t.categoryId ?? t.categoryId;
@@ -57,7 +61,7 @@ export default function ForumDashboard() {
                     id,
                     title: t.title,
                     categoryId: Number(catId || 0),
-                    categoryTitle: categories.find((c) => c.id === Number(catId))?.title || 'General',
+                    categoryTitle: cats.find((c) => c.id === Number(catId))?.title || 'General',
                     content: t.content,
                     author: t.username ?? `User ${userId ?? ''}`,
                     createdAt: (typeof createdAt === 'string') ? createdAt : new Date(createdAt).toISOString(),
@@ -79,7 +83,10 @@ export default function ForumDashboard() {
         } finally {
             setLoadingThreads(false);
         }
-    }
+    }, []);
+
+    // keep categoriesRef up to date to avoid stale closures inside loadThreads
+    useEffect(() => { categoriesRef.current = categories; }, [categories]);
 
     // called when modal submits a new thread
     async function handleCreateThread({ title, categoryId, content, author = "You" }) {
@@ -162,16 +169,64 @@ export default function ForumDashboard() {
         }
     }
 
-    // fetch threads on mount
+    
+
+    // fetch online count and schedule polling every 10s
+    const fetchOnlineCount = useCallback(async () => {
+        try {
+            const headers = { 'Accept': 'application/json' };
+            const authToken = (user && user.token) ? user.token : localStorage.getItem('token');
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+            const res = await fetch(`${apiBase}/api/online/count`, { headers });
+            if (!res.ok) throw new Error('Failed to fetch online count');
+            const json = await res.json();
+            if (json && json.status) setOnlineCount(Number(json.count || 0));
+        } catch (e) {
+            console.error('Failed to fetch online count', e);
+        } finally {
+            // ensure polling is set
+            if (!onlineTimerRef.current) {
+                onlineTimerRef.current = setInterval(fetchOnlineCount, 10000);
+            }
+        }
+    }, [user]);
+
+    // heartbeat: explicit mark endpoint for logged-in users
+    useEffect(() => {
+        let hb = null;
+        async function sendMark() {
+            try {
+                const tokenVal = (user && user.token) || localStorage.getItem('token');
+                if (!tokenVal) return;
+                const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+                await fetch(`${apiBase}/api/online/mark`, { method: 'POST', headers: { 'Authorization': `Bearer ${tokenVal}` } });
+            } catch (e) {
+                // ignore
+            }
+        }
+        // send one mark immediately and then every 30s
+        sendMark();
+        hb = setInterval(sendMark, 30000);
+        return () => { if (hb) clearInterval(hb); };
+    }, [user]);
+
+    // mount effect: call initial loaders after callbacks are defined
     useEffect(() => {
         loadThreads();
+        // initial fetch online count
+        fetchOnlineCount();
         return () => {
             if (searchTimerRef.current) {
                 clearTimeout(searchTimerRef.current);
                 searchTimerRef.current = null;
             }
+            if (onlineTimerRef.current) {
+                clearInterval(onlineTimerRef.current);
+                onlineTimerRef.current = null;
+            }
         };
-    }, []); // run once on mount
+    }, [loadThreads, fetchOnlineCount]);
 
     return (
         <div className="fd-page">
@@ -233,13 +288,13 @@ export default function ForumDashboard() {
             <main className="fd-container">
                 <section className="fd-stats-row">
                     {stats.map(s => (
-                        <div key={s.id} className="fd-stat-card">
+                            <div key={s.id} className="fd-stat-card">
                             <div className="fd-stat-left">
                                 <div className="fd-icon-box" style={{ background: s.color }}>
                                     <span className="fd-icon">{s.icon}</span>
                                 </div>
                                 <div>
-                                    <div className="fd-stat-value">{s.value}</div>
+                                        <div className="fd-stat-value">{s.id === 3 && onlineCount !== null ? onlineCount : s.value}</div>
                                     <div className="fd-stat-label">{s.label}</div>
                                 </div>
                             </div>
@@ -249,7 +304,12 @@ export default function ForumDashboard() {
 
                 <section className="fd-section-header">
                     <h2 className="fd-section-title">Categories</h2>
-                    <button className="fd-new-thread" onClick={openNewThread}>+ New Thread</button>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {user && (String(user.role || '').toLowerCase() === 'admin') && (
+                            <Link to="/threads-reports" className="fd-btn" style={{ background: '#111827', color: 'white' }}>Thread Reports</Link>
+                        )}
+                        <button className="fd-new-thread" onClick={openNewThread}>+ New Thread</button>
+                    </div>
                 </section>
 
                 <section className="fd-grid">

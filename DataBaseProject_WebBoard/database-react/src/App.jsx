@@ -10,6 +10,7 @@ import Profile from './Components/Profile';
 import EditProfile from './Components/EditProfile';
 import ForgotPassword from './Components/ForgotPassword';
 import ThreadView from './Components/ThreadView';
+import ThreadsReports from './Components/ThreadsReports';
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
                     <Route path="/thread/:id" element={<ThreadView />} />
+                    <Route path="/threads-reports" element={<ThreadsReports />} />
                 </Routes>
             </Router>
         </AuthProvider>

@@ -5,6 +5,8 @@ import './CssStore/animated-background.css';
 import { sendRegister } from './APIs/api';
 import { useAuth } from './AuthProvider';
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 function SignUpPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -13,6 +15,11 @@ function SignUpPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    // realtime availability checks removed — validation happens on submit
+
+    
+
+    
     const navigate = useNavigate();
     const { login } = useAuth();
 
@@ -39,8 +46,10 @@ function SignUpPage() {
 
         setLoading(true);
         try {
-            // call backend register API
-            const res = await sendRegister({ username, password, email });
+            // call backend register API (validation happens on submit)
+            const usernameNormalized = (username || '').toString().trim();
+            const emailNormalized = (email || '').toString().trim().toLowerCase();
+            const res = await sendRegister({ username: usernameNormalized, password, email: emailNormalized });
             if (res && res.status) {
                 // set client auth so header shows profile
                 try { login({ username: res.username || username, email: email }); } catch (e) {}
@@ -96,6 +105,7 @@ function SignUpPage() {
                             onChange={(e) => setUsername(e.target.value)}
                             autoFocus
                         />
+                        <div style={{ height: 20 }} />
                         <input
                             className="pp-signup-input"
                             type="email"
@@ -103,6 +113,7 @@ function SignUpPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
+                        <div style={{ height: 20 }} />
                         <input
                             className="pp-signup-input"
                             type="password"

@@ -17,7 +17,7 @@ export default function ThreadsReports() {
   // derive role (from auth provider or localStorage fallback)
   const derivedRole = (user && user.role) || (() => {
     try {
-      const raw = localStorage.getItem('user');
+      const raw = sessionStorage.getItem('user');
       if (raw) return JSON.parse(raw).role;
     } catch (e) { }
     return null;
@@ -162,7 +162,7 @@ export default function ThreadsReports() {
             <div><strong>Raw user object</strong></div>
             <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{JSON.stringify(user, null, 2)}</pre>
             <div style={{ marginTop: 8 }}><strong>localStorage.user</strong></div>
-            <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{localStorage.getItem('user')}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{sessionStorage.getItem('user')}</pre>
             <div style={{ marginTop: 8 }}><strong>raw token</strong></div>
             <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{String(token)}</pre>
           </div>

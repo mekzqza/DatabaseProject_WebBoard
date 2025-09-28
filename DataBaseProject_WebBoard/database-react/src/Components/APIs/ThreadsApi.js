@@ -9,7 +9,7 @@ function makeHeaders(isJson = true) {
     if (isJson) headers['Content-Type'] = 'application/json';
     // send token if stored (optional, depends on your auth flow)
     try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) headers['Authorization'] = `Bearer ${token}`;
     } catch (e) {
         // ignore localStorage errors

@@ -148,7 +148,7 @@ export async function updateUser(user, token) {
     const url = `${API_BASE}/api/users/${encodeURIComponent(id)}`;
 
     // prefer explicit token param, otherwise try localStorage token
-    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+    const authToken = token || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('token') : null);
     const headers = { 'Content-Type': 'application/json' };
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
@@ -219,7 +219,7 @@ export async function getThreads() {
 export async function createThread(thread, token) {
     if (!thread || !thread.title || !thread.content) throw new Error('title and content are required');
     const url = `${API_BASE}/api/threads`;
-    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+    const authToken = token || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('token') : null);
     const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json'

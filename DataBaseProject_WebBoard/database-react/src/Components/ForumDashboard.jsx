@@ -100,12 +100,12 @@ export default function ForumDashboard() {
         }
 
         // derive numeric user id robustly (from auth user or localStorage fallback)
-        let uid = undefined;
+                let uid = undefined;
         try {
             const candidate = user && (user.id ?? user.user_id ?? user.userId ?? user.uid);
             uid = Number(candidate);
             if (!uid || uid <= 0) {
-                const raw = localStorage.getItem('user');
+                const raw = sessionStorage.getItem('user');
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     const cand2 = parsed && (parsed.id ?? parsed.user_id ?? parsed.userId ?? parsed.uid);
@@ -175,7 +175,7 @@ export default function ForumDashboard() {
     const fetchOnlineCount = useCallback(async () => {
         try {
             const headers = { 'Accept': 'application/json' };
-            const authToken = (user && user.token) ? user.token : localStorage.getItem('token');
+            const authToken = (user && user.token) ? user.token : sessionStorage.getItem('token');
             if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
             const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
             const res = await fetch(`${apiBase}/api/online/count`, { headers });
@@ -197,7 +197,7 @@ export default function ForumDashboard() {
         let hb = null;
         async function sendMark() {
             try {
-                const tokenVal = (user && user.token) || localStorage.getItem('token');
+                const tokenVal = (user && user.token) || sessionStorage.getItem('token');
                 if (!tokenVal) return;
                 const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
                 await fetch(`${apiBase}/api/online/mark`, { method: 'POST', headers: { 'Authorization': `Bearer ${tokenVal}` } });

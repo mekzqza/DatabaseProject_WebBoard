@@ -65,22 +65,10 @@ async function tryFetch(url, options = {}) {
 }
 
 export async function getThreads(q = null) {
-    // accept optional search query `q` — append as ?q=... to the candidate paths
-    const basePaths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
-    const paths = (q && q.toString().trim()) ? basePaths.map(p => `${p}?q=${encodeURIComponent(q.toString().trim())}`) : basePaths;
-    let lastError = null;
-    for (const url of paths) {
-        try {
-            return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
-        } catch (e) {
-            lastError = e;
-            // try next
-        }
-    }
-    // if we get here all attempts failed
-    const err = new Error(lastError?.message || 'Failed to fetch threads');
-    err.cause = lastError;
-    throw err;
+    // Call the API endpoint mounted at /api/threads
+    const base = `${API_BASE.replace(/\/$/, '')}/api/threads`;
+    const url = (q && q.toString().trim()) ? `${base}?q=${encodeURIComponent(q.toString().trim())}` : base;
+    return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 }
 
 // payload: { title, content, categoryId, userId }
@@ -102,78 +90,35 @@ export async function createThread({ title, content, categoryId, userId }, token
         if (!Number.isNaN(uid) && uid > 0) body.user_id = uid;
     }
 
-    const paths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
-    let lastError = null;
-    for (const url of paths) {
-        try {
-            // prepare headers
-            const headers = { 'Content-Type': 'application/json' };
-            // if token provided as argument, use it; otherwise let tryFetch merge from localStorage
-            if (token) headers['Authorization'] = `Bearer ${token}`;
+    const url = `${API_BASE.replace(/\/$/, '')}/api/threads`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await tryFetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
 
-            // call server
-            const res = await tryFetch(url, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(body),
-            });
-
-            // normalize common response envelopes
-            if (!res) return res;
-            if (res.thread) return res.thread;
-            if (res.data) {
-                if (Array.isArray(res.data) && res.data.length > 0) return res.data[0];
-                if (res.data.thread) return res.data.thread;
-                return res.data;
-            }
-            if (res.result) return res.result;
-
-            return res;
-        } catch (e) {
-            lastError = e;
-            // try next
-        }
+    // normalize common response envelopes
+    if (!res) return res;
+    if (res.thread) return res.thread;
+    if (res.data) {
+        if (Array.isArray(res.data) && res.data.length > 0) return res.data[0];
+        if (res.data.thread) return res.data.thread;
+        return res.data;
     }
-
-    const err = new Error(lastError?.message || 'Failed to create thread');
-    err.cause = lastError;
-    throw err;
+    if (res.result) return res.result;
+    return res;
 }
 
 // fetch a single thread by id
 export async function getThreadById(id) {
     if (!id && id !== 0) throw new Error('id is required');
-    const basePaths = [`${API_BASE}/threads`, `${API_BASE}/api/threads`];
-    let lastError = null;
-    for (const base of basePaths) {
-        const url = `${base}/${encodeURIComponent(id)}`;
-        try {
-            return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
-        } catch (e) {
-            lastError = e;
-        }
-    }
-    const err = new Error(lastError?.message || 'Failed to fetch thread');
-    err.cause = lastError;
-    throw err;
+    const url = `${API_BASE.replace(/\/$/, '')}/api/threads/${encodeURIComponent(id)}`;
+    return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 }
 
 // update a thread by id (requires auth)
 export async function updateThread(id, payload = {}, token = null) {
     if (!id && id !== 0) throw new Error('id is required');
-    const paths = [`${API_BASE}/threads/${encodeURIComponent(id)}`, `${API_BASE}/api/threads/${encodeURIComponent(id)}`];
-    let lastError = null;
-    for (const url of paths) {
-        try {
-            const headers = { 'Content-Type': 'application/json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-            const res = await tryFetch(url, { method: 'PUT', headers, body: JSON.stringify(payload) });
-            return res;
-        } catch (e) {
-            lastError = e;
-        }
-    }
-    const err = new Error(lastError?.message || 'Failed to update thread');
-    err.cause = lastError;
-    throw err;
+    const url = `${API_BASE.replace(/\/$/, '')}/api/threads/${encodeURIComponent(id)}`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return await tryFetch(url, { method: 'PUT', headers, body: JSON.stringify(payload) });
 }

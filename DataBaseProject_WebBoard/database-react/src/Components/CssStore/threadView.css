@@ -103,6 +103,24 @@
 
   .tv-content{ color:var(--text); line-height:1.7; font-size:15px; }
 
+  /* Ensure thread owner name is strongly black */
+  .tv-author{
+    color: #000000 !important;
+  }
+
+  /* Main thread content block styling for readability */
+  .tv-content{
+    color: #000000 !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.9));
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(2,6,23,0.04);
+    box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+    font-size: 15.5px;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
   .tv-edit-form .tv-input{ width:100%; padding:10px; border-radius:8px; border:1px solid rgba(2,6,23,0.06); margin-bottom:8px; }
   .tv-edit-form .tv-textarea{ width:100%; padding:10px; border-radius:8px; border:1px solid rgba(2,6,23,0.06); min-height:200px; resize:vertical; }
   .tv-form-actions{ display:flex; gap:8px; margin-top:8px; }

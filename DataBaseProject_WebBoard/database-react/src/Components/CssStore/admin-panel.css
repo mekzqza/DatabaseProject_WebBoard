@@ -1,0 +1,8 @@
+.admin-page{ padding:24px; }
+.admin-header{ margin-bottom:12px; }
+.admin-main{ background: #fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); }
+.admin-controls{ display:flex; gap:8px; margin-bottom:12px; }
+.admin-search{ padding:8px 10px; border-radius:8px; border:1px solid rgba(2,6,23,0.06); width:320px; }
+.admin-table{ width:100%; border-collapse:collapse; }
+.admin-table th, .admin-table td{ text-align:left; padding:10px 8px; border-bottom:1px solid rgba(2,6,23,0.04); }
+.admin-error{ color:#ef4444; }

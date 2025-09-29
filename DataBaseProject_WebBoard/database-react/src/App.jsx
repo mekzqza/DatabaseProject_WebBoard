@@ -11,6 +11,7 @@ import EditProfile from './Components/EditProfile';
 import ForgotPassword from './Components/ForgotPassword';
 import ThreadView from './Components/ThreadView';
 import ThreadsReports from './Components/ThreadsReports';
+import AdminPanel from './Components/AdminPanel';
 
 export default function App() {
     return (
@@ -25,6 +26,7 @@ export default function App() {
                     <Route path="/profile/edit" element={<EditProfile />} />
                     <Route path="/thread/:id" element={<ThreadView />} />
                     <Route path="/threads-reports" element={<ThreadsReports />} />
+                    <Route path="/admin" element={<AdminPanel />} />
                 </Routes>
             </Router>
         </AuthProvider>

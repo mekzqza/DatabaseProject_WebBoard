@@ -5,6 +5,27 @@ const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const cache = require('../cache');
 
+// GET /api/users/count - return total number of users (cached)
+router.get('/count', async (req, res) => {
+  try {
+    const cacheKey = 'users:count';
+    try {
+      const cached = await cache.getJson(cacheKey);
+      if (cached && typeof cached.count !== 'undefined') return res.json({ status: true, count: Number(cached.count) });
+    } catch (cacheErr) {
+      // ignore cache errors
+    }
+
+    const [rows] = await pool.query('SELECT COUNT(*) AS cnt FROM users');
+    const cnt = Array.isArray(rows) && rows[0] ? Number(rows[0].cnt || rows[0].CNT || 0) : 0;
+    try { await cache.setJson(cacheKey, { count: cnt }, 60); } catch (e) { /* ignore cache set error */ }
+    return res.json({ status: true, count: cnt });
+  } catch (err) {
+    console.error('users/count error', err);
+    return res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
 // GET /api/users
 router.get('/', async (req, res) => {
   try {

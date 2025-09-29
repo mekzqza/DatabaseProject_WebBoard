@@ -9,8 +9,8 @@ import { getThreads, createThread } from './APIs/ThreadsApi';
 const initialStats = [
     // initialize total threads to 0 — we'll update from the API on mount
     { id: 1, icon: "Chat", value: 0, label: "Total Threads", color: "var(--blue-50)" },
-    { id: 2, icon: "Members", value: "5,678", label: "Active Members", color: "var(--green-50)" },
-    { id: 3, icon: "Online", value: 89, label: "Online Now", color: "var(--amber-50)" },
+    // Members value will be replaced by the real user count from the backend
+    { id: 2, icon: "Members", value: 0, label: "Active Members", color: "var(--green-50)" },
 ];
 
 const initialCategories = [
@@ -32,10 +32,11 @@ export default function ForumDashboard() {
     const [showProfile, setShowProfile] = useState(false);
     const [loadingThreads, setLoadingThreads] = useState(false);
     const [threadsError, setThreadsError] = useState('');
-    const [onlineCount, setOnlineCount] = useState(null);
+    // user count will be loaded from the API
+    const [userCount, setUserCount] = useState(null);
     const navigate = useNavigate();
     const searchTimerRef = React.useRef(null);
-    const onlineTimerRef = React.useRef(null);
+    
 
     function openNewThread() {
         setModalOpen(true);
@@ -171,62 +172,37 @@ export default function ForumDashboard() {
 
     
 
-    // fetch online count and schedule polling every 10s
-    const fetchOnlineCount = useCallback(async () => {
-        try {
-            const headers = { 'Accept': 'application/json' };
-            const authToken = (user && user.token) ? user.token : sessionStorage.getItem('token');
-            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-            const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
-            const res = await fetch(`${apiBase}/api/online/count`, { headers });
-            if (!res.ok) throw new Error('Failed to fetch online count');
-            const json = await res.json();
-            if (json && json.status) setOnlineCount(Number(json.count || 0));
-        } catch (e) {
-            console.error('Failed to fetch online count', e);
-        } finally {
-            // ensure polling is set
-            if (!onlineTimerRef.current) {
-                onlineTimerRef.current = setInterval(fetchOnlineCount, 10000);
-            }
-        }
-    }, [user]);
-
-    // heartbeat: explicit mark endpoint for logged-in users
+    // fetch user count from backend and update Members stat
     useEffect(() => {
-        let hb = null;
-        async function sendMark() {
+        let mounted = true;
+        async function fetchUserCount() {
             try {
-                const tokenVal = (user && user.token) || sessionStorage.getItem('token');
-                if (!tokenVal) return;
                 const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
-                await fetch(`${apiBase}/api/online/mark`, { method: 'POST', headers: { 'Authorization': `Bearer ${tokenVal}` } });
+                const res = await fetch(`${apiBase}/api/users/count`);
+                if (!res.ok) throw new Error('Failed to fetch user count');
+                const json = await res.json();
+                const count = Number(json && (json.count ?? json.total ?? json.userCount) || 0);
+                if (!mounted) return;
+                setUserCount(count);
+                setStats(prev => prev.map(s => s.id === 2 ? { ...s, value: count } : s));
             } catch (e) {
-                // ignore
+                console.error('Failed to fetch user count', e);
             }
         }
-        // send one mark immediately and then every 30s
-        sendMark();
-        hb = setInterval(sendMark, 30000);
-        return () => { if (hb) clearInterval(hb); };
-    }, [user]);
+        fetchUserCount();
+        return () => { mounted = false; };
+    }, []);
 
     // mount effect: call initial loaders after callbacks are defined
     useEffect(() => {
         loadThreads();
-        // initial fetch online count
-        fetchOnlineCount();
         return () => {
             if (searchTimerRef.current) {
                 clearTimeout(searchTimerRef.current);
                 searchTimerRef.current = null;
             }
-            if (onlineTimerRef.current) {
-                clearInterval(onlineTimerRef.current);
-                onlineTimerRef.current = null;
-            }
         };
-    }, [loadThreads, fetchOnlineCount]);
+    }, [loadThreads]);
 
     return (
         <div className="fd-page">
@@ -294,7 +270,7 @@ export default function ForumDashboard() {
                                     <span className="fd-icon">{s.icon}</span>
                                 </div>
                                 <div>
-                                        <div className="fd-stat-value">{s.id === 3 && onlineCount !== null ? onlineCount : s.value}</div>
+                                        <div className="fd-stat-value">{s.value}</div>
                                     <div className="fd-stat-label">{s.label}</div>
                                 </div>
                             </div>

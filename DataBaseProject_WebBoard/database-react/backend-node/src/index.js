@@ -17,6 +17,7 @@ const morgan = require('morgan');
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const threadsRoutes = require('./routes/threads');
+const postsRoutes = require('./routes/posts');
 const presenceRoutes = require('./routes/presence');
 const reportsRoutes = require('./routes/reports');
 
@@ -31,6 +32,7 @@ app.use(express.json());
 app.use('/api', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/threads', threadsRoutes);
+app.use('/api/posts', postsRoutes);
 app.use('/api/online', presenceRoutes);
 app.use('/api/reports', reportsRoutes);
 

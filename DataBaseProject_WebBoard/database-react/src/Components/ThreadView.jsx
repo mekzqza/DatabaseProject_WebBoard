@@ -14,6 +14,12 @@ export default function ThreadView() {
     const { user, token } = useAuth();
     const [editMode, setEditMode] = useState(false);
     const [form, setForm] = useState({ title: '', content: '', category_id: null });
+    const [posts, setPosts] = useState([]);
+    const [postsLoading, setPostsLoading] = useState(true);
+    const [newPostContent, setNewPostContent] = useState('');
+    // API base (normalize trailing slash)
+    const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+    const [likedPostIds, setLikedPostIds] = useState(new Set());
 
     useEffect(() => {
         let mounted = true;
@@ -32,13 +38,71 @@ export default function ThreadView() {
         return () => { mounted = false; };
     }, [id]);
 
+    // load posts for this thread
+    useEffect(() => {
+        let mounted = true;
+        async function fetchPosts() {
+            setPostsLoading(true);
+            try {
+                const res = await fetch(`${API_BASE}/api/posts?thread_id=${encodeURIComponent(id)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                if (!mounted) return;
+                // normalize avatar_url: if starts with /uploads ensure full URL
+                const normalized = (Array.isArray(data) ? data : []).map(p => {
+                    if (p && p.avatar_url && p.avatar_url.startsWith('/uploads')) {
+                        return { ...p, avatar_url: API_BASE + p.avatar_url };
+                    }
+                    return p;
+                });
+                setPosts(normalized);
+                // if user logged in, check which posts are liked by this user
+                if (token) {
+                    try {
+                        const checks = normalized.map(p => fetch(`${API_BASE}/api/posts/${encodeURIComponent(p.post_id)}/liked`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json().catch(() => null)));
+                        const results = await Promise.all(checks);
+                        const liked = new Set();
+                        results.forEach((r, i) => { if (r && r.liked) liked.add(String(normalized[i].post_id)); });
+                        setLikedPostIds(liked);
+                    } catch (e) { /* ignore */ }
+                }
+            } catch (e) {
+                console.error('Failed to load posts', e);
+                if (mounted) setPosts([]);
+            } finally {
+                if (mounted) setPostsLoading(false);
+            }
+        }
+        if (id) fetchPosts();
+        return () => { mounted = false; };
+    }, [id]);
+
     const canEdit = user && Number(user.user_id || user.id) === Number(thread && thread.user_id);
     const canReport = user && !(Number(user.user_id || user.id) === Number(thread && thread.user_id));
     const [reportOpen, setReportOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
     const [reportLoading, setReportLoading] = useState(false);
-    const [reportMessage, setReportMessage] = useState('');
-    const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+        const [reportMessage, setReportMessage] = useState('');
+
+        // like a post (simple increment). Server accepts updating like_count via PUT /api/posts/:id
+        async function handleLike(postId) {
+            try {
+                if (!token) return alert('Please login to like');
+                if (likedPostIds.has(String(postId))) return; // already liked in this session
+                const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                const res = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(postId)}/like`, { method: 'POST', headers });
+                const json = await res.json().catch(() => null);
+                if (!res.ok) {
+                    console.error('Like failed', json);
+                    return;
+                }
+                // update post like_count and mark liked
+                setPosts(prev => prev.map(p => (Number(p.post_id) === Number(postId) ? { ...p, like_count: json.like_count || (p.like_count||0) } : p)));
+                setLikedPostIds(s => new Set(Array.from(s).concat(String(postId))));
+            } catch (err) {
+                console.error('Like error', err);
+            }
+        }
 
     async function deleteThread() {
         if (!window.confirm('Delete this thread? This cannot be undone.')) return;
@@ -123,6 +187,76 @@ export default function ThreadView() {
                             ) : (
                                 <div className="tv-content" dangerouslySetInnerHTML={{ __html: thread.content || thread.body || '' }} />
                             )}
+                        </section>
+                        
+                        <section className="tv-posts">
+                            <h3>Replies</h3>
+                            {postsLoading ? (
+                                <div className="tv-empty">Loading replies...</div>
+                            ) : posts.length === 0 ? (
+                                <div className="tv-empty">No replies yet. Be the first to reply.</div>
+                            ) : (
+                                posts.map(p => (
+                                    <div key={p.post_id} className="tv-post">
+                                        <div className="tv-post-left">
+                                            {p.avatar_url ? (
+                                                <img src={p.avatar_url} alt={p.username || 'avatar'} className="tv-avatar-img" />
+                                            ) : (
+                                                <div className="tv-avatar">{(p.username || 'U').charAt(0).toUpperCase()}</div>
+                                            )}
+                                        </div>
+                                        <div className="tv-post-body">
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <div className="tv-post-author">{p.username || 'Unknown'}</div>
+                                                    <div className="tv-post-time tv-muted">{p.created_at ? new Date(p.created_at).toLocaleString() : ''}</div>
+                                                </div>
+                                                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <button className="tv-like-button" onClick={() => handleLike(p.post_id)} title="Like" disabled={likedPostIds.has(String(p.post_id))}>{likedPostIds.has(String(p.post_id)) ? '♥' : '❤'}</button>
+                                                    <div className="tv-like-count">{p.like_count || 0}</div>
+                                                </div>
+                                            </div>
+                                            <div className="tv-post-content" style={{ marginTop: 6 }}>{p.content}</div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+
+                            <div className="tv-new-post">
+                                {user ? (
+                                    <>
+                                        <textarea className="tv-textarea" rows={4} value={newPostContent} onChange={e => setNewPostContent(e.target.value)} placeholder="Write a reply..." />
+                                        <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                                            <button className="tv-btn tv-btn-primary" onClick={async () => {
+                                                if (!newPostContent || !newPostContent.trim()) return alert('Please enter a message');
+                                                try {
+                                                    const headers = { 'Content-Type': 'application/json' };
+                                                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                                                    const res = await fetch(`${API_BASE}/api/posts`, { method: 'POST', headers, body: JSON.stringify({ thread_id: id, content: newPostContent }) });
+                                                    let json = null;
+                                                    try { json = await res.json(); } catch (e) { /* ignore */ }
+                                                    if (!res.ok) {
+                                                        alert((json && json.message) ? json.message : `Request failed (${res.status})`);
+                                                        return;
+                                                    }
+                                                    // normalize avatar_url on the new post then append
+                                                    if (json && json.avatar_url && json.avatar_url.startsWith('/uploads')) {
+                                                        json.avatar_url = API_BASE + json.avatar_url;
+                                                    }
+                                                    setPosts(prev => ([ ...prev, json ]));
+                                                    setNewPostContent('');
+                                                } catch (err) {
+                                                    console.error('Create post failed', err);
+                                                    alert('Failed to create post');
+                                                }
+                                            }}>Reply</button>
+                                            <button className="tv-btn" onClick={() => setNewPostContent('')}>Cancel</button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="tv-muted">You must be logged in to reply.</div>
+                                )}
+                            </div>
                         </section>
                         {/* report modal */}
                         {reportOpen && (

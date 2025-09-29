@@ -20,8 +20,10 @@ async function resolveUserRole(userId) {
 router.get('/', async (req, res) => {
   // join users to include username
   // allow optional q parameter to search by title (case-insensitive)
+  // allow optional user_id to filter threads by owner
   const q = (req.query.q || '').toString().trim();
-  const cacheKey = `threads:q=${q}`;
+  const userId = req.query.user_id ? req.query.user_id.toString().trim() : '';
+  const cacheKey = `threads:q=${q}:user_id=${userId}`;
   try {
     // try cache first
     try {
@@ -34,10 +36,21 @@ router.get('/', async (req, res) => {
       // continue to DB on cache errors
     }
 
-    if (q) {
-      // parameterized query, use LOWER(title) for case-insensitive match
-      const sqlq = `SELECT t.thread_id, t.category_id, t.user_id, u.username, t.title, t.content, t.created_at, t.updated_at FROM threads t LEFT JOIN users u ON t.user_id = u.user_id WHERE LOWER(t.title) LIKE ? ORDER BY t.created_at DESC`;
-      const [rows] = await pool.query(sqlq, [`%${q.toLowerCase()}%`]);
+    // build SQL with optional filters
+    if (q || userId) {
+      const parts = [];
+      const params = [];
+      if (userId) {
+        parts.push('t.user_id = ?');
+        params.push(userId);
+      }
+      if (q) {
+        parts.push('LOWER(t.title) LIKE ?');
+        params.push(`%${q.toLowerCase()}%`);
+      }
+      const where = parts.length ? `WHERE ${parts.join(' AND ')}` : '';
+      const sqlq = `SELECT t.thread_id, t.category_id, t.user_id, u.username, t.title, t.content, t.created_at, t.updated_at FROM threads t LEFT JOIN users u ON t.user_id = u.user_id ${where} ORDER BY t.created_at DESC`;
+      const [rows] = await pool.query(sqlq, params);
 
       // set cache (expire in seconds)
       try {

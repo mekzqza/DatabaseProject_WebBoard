@@ -11,6 +11,7 @@ export default function EditProfile() {
     const [username, setUsername] = useState(user?.username || '');
     const [email, setEmail] = useState(user?.email || '');
     const [bio, setBio] = useState(user?.bio || '');
+    const [socialLinks, setSocialLinks] = useState(user?.social_links || user?.social || '');
     const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || '');
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
@@ -63,6 +64,7 @@ export default function EditProfile() {
                 username: username,
                 email: email,
                 bio: bio,
+                social_links: socialLinks,
                 // use avatarPreview (DataURL) if present, otherwise send null to clear
                 avatar_url: avatarPreview || null,
             };
@@ -112,6 +114,10 @@ export default function EditProfile() {
                                 <input value={email} onChange={(e) => setEmail(e.target.value)} />
                             </label>
                             <div className="ep-join">วันที่เข้าร่วม: <strong>{joinDateText}</strong></div>
+                            <label style={{ marginTop: 8 }}>
+                                Social links (comma-separated or JSON)
+                                <input value={socialLinks} onChange={(e) => setSocialLinks(e.target.value)} placeholder="https://twitter.com/you, https://github.com/you" />
+                            </label>
                         </div>
                     </div>
 

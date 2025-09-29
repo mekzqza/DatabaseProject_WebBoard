@@ -2,8 +2,10 @@
 .profile-page {
   padding: 28px 20px;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px;
   min-height: calc(100vh - 60px);
   background: linear-gradient(180deg, rgba(15,23,42,0.02), rgba(255,255,255,0.01));
 }
@@ -19,6 +21,54 @@
   max-width: 720px;
   width: 100%;
   border: 1px solid #eef2f7;
+}
+
+/* threads section sits below the profile-card */
+.profile-threads {
+  width: 100%;
+  max-width: 720px;
+  background: transparent;
+}
+
+.profile-threads h3 {
+  margin: 0 0 10px 8px;
+  color: #0f1724;
+}
+
+.threads-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.thread-item {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.thread-item a {
+  color: #0f1724;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.thread-meta {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.threads-list .muted {
+  color: #6b7280;
+  padding: 10px 14px;
 }
 
 .profile-avatar {

@@ -41,11 +41,11 @@ export default function ProfilePopup({ onClose }) {
                     {avatarEl}
                     <div className="ppop-info">
                         <div className="ppop-name">{user?.username || 'User'}</div>
-                        <div className="ppop-subbtns">
+                            <div className="ppop-subbtns">
                             <button
                                 className="ppop-btn"
-                                onClick={() => { onClose?.(); navigate('/profile/edit'); }}
-                            >แก้ไขโปรไฟล์</button>
+                                onClick={() => { onClose?.(); navigate('/profile'); }}
+                            >ดูโปรไฟล์</button>
                             {user && String(user.role || '').toLowerCase() === 'admin' && (
                                 <button
                                     className="ppop-btn ppop-admin"

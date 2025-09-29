@@ -52,6 +52,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+// PUT /api/users/:id/role - admin only: change another user's role
+router.put('/:id/role', auth, async (req, res) => {
+  const targetId = req.params.id;
+  const newRole = (req.body && req.body.role || '').toString().trim();
+  if (!newRole) return res.status(400).json({ status: false, message: 'role is required' });
+
+  try {
+    // verify requester is admin (lookup role from DB to be safe)
+    const requesterId = req.user && (req.user.user_id || req.user.id || req.user.userId);
+    if (!requesterId) return res.status(403).json({ status: false, message: 'Forbidden' });
+    const [rrows] = await pool.query('SELECT role FROM users WHERE user_id = ? LIMIT 1', [requesterId]);
+    const requesterRole = Array.isArray(rrows) && rrows[0] ? (rrows[0].role || '').toString().toLowerCase() : '';
+    if (requesterRole !== 'admin') return res.status(403).json({ status: false, message: 'Admin role required' });
+
+    // update the target user's role
+    const now = new Date();
+    const [result] = await pool.query('UPDATE users SET role = ?, updated_at = ? WHERE user_id = ?', [newRole, now, targetId]);
+
+    // invalidate caches
+    try { await cache.del('users:all'); await cache.del(`user:${targetId}`); } catch (e) { /* ignore */ }
+
+    return res.json({ status: true, message: 'Role updated' });
+  } catch (err) {
+    console.error('PUT /users/:id/role error', err);
+    return res.status(500).json({ status: false, message: 'Internal server error' });
+  }
+});
+
 // GET /api/users/:id
 router.get('/:id', async (req, res) => {
   const id = req.params.id;

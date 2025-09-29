@@ -1,8 +1,12 @@
 .admin-page{ padding:24px; }
 .admin-header{ margin-bottom:12px; }
-.admin-main{ background: #fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); }
+.admin-header h1{ color:#000; }
+.admin-main{ background: #fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); color: #000; }
 .admin-controls{ display:flex; gap:8px; margin-bottom:12px; }
 .admin-search{ padding:8px 10px; border-radius:8px; border:1px solid rgba(2,6,23,0.06); width:320px; }
-.admin-table{ width:100%; border-collapse:collapse; }
-.admin-table th, .admin-table td{ text-align:left; padding:10px 8px; border-bottom:1px solid rgba(2,6,23,0.04); }
+.admin-table{ width:100%; border-collapse:separate; border-spacing:0 10px; }
+.admin-table thead th{ color:#6b7280; font-weight:700; text-transform:capitalize; }
+.admin-table th, .admin-table td{ text-align:left; padding:14px 12px; border: none; color: #000; }
+.admin-table tbody tr{ background: #fff; border: 1px solid rgba(2,6,23,0.06); border-radius:10px; box-shadow:0 4px 10px rgba(2,6,23,0.03); }
+.admin-table tbody tr td{ border-bottom: none; }
 .admin-error{ color:#ef4444; }

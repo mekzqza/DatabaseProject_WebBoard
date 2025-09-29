@@ -45,6 +45,8 @@ export default function AdminPanel() {
         return () => { mounted = false; };
     }, [token]);
 
+    const [saving, setSaving] = useState(null);
+
     const filtered = useMemo(() => {
         const term = (q || '').toLowerCase().trim();
         if (!term) return users;
@@ -55,6 +57,11 @@ export default function AdminPanel() {
         <div className="admin-page">
             <header className="admin-header">
                 <h1>Admin Panel</h1>
+                {user && String(user.role || '').toLowerCase() === 'admin' && (
+                    <div style={{ marginLeft: 'auto' }}>
+                        <button className="fd-btn" onClick={() => navigate('/threads-reports')} style={{ background: '#111827', color: 'white' }}>Thread Reports</button>
+                    </div>
+                )}
             </header>
 
             <main className="admin-main">
@@ -70,9 +77,41 @@ export default function AdminPanel() {
                         <tbody>
                             {filtered.map(u => (
                                 <tr key={u.user_id || u.id || u.email}>
-                                    <td>{u.username}</td>
-                                    <td>{u.email}</td>
-                                    <td>{u.role || ''}</td>
+                                    <td style={{ width: '35%' }}>{u.username}</td>
+                                    <td style={{ width: '45%' }}>{u.email}</td>
+                                    <td style={{ width: '20%' }}>
+                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                            <select defaultValue={u.role || 'user'} onChange={(e) => {
+                                                // optimistic UI: update local users array
+                                                const val = e.target.value;
+                                                setUsers(prev => prev.map(x => x.user_id === u.user_id ? { ...x, role: val } : x));
+                                            }}>
+                                                <option value="user">user</option>
+                                                <option value="moderator">moderator</option>
+                                                <option value="admin">admin</option>
+                                            </select>
+                                            <button className="fd-btn" onClick={async () => {
+                                                try {
+                                                    setSaving(u.user_id);
+                                                    const apiBase = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+                                                    const headers = { 'Content-Type': 'application/json' };
+                                                    const tokenVal = (user && user.token) || sessionStorage.getItem('token');
+                                                    if (tokenVal) headers['Authorization'] = `Bearer ${tokenVal}`;
+                                                    const res = await fetch(`${apiBase}/api/users/${encodeURIComponent(u.user_id)}/role`, {
+                                                        method: 'PUT', headers, body: JSON.stringify({ role: u.role || 'user' })
+                                                    });
+                                                    if (!res.ok) {
+                                                        const body = await res.json().catch(() => null);
+                                                        throw new Error((body && body.message) ? body.message : `HTTP ${res.status}`);
+                                                    }
+                                                    // success — leave local state as-is
+                                                } catch (e) {
+                                                    console.error('Failed to update role', e);
+                                                    alert('Failed to update role: ' + (e.message || e));
+                                                } finally { setSaving(null); }
+                                            }} disabled={saving === u.user_id}>{saving === u.user_id ? 'Saving...' : 'Save'}</button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

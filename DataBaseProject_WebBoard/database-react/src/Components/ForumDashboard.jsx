@@ -280,10 +280,7 @@ export default function ForumDashboard() {
 
                 <section className="fd-section-header">
                     <h2 className="fd-section-title">Categories</h2>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        {user && (String(user.role || '').toLowerCase() === 'admin') && (
-                            <Link to="/threads-reports" className="fd-btn" style={{ background: '#111827', color: 'white' }}>Thread Reports</Link>
-                        )}
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <button className="fd-new-thread" onClick={openNewThread}>+ New Thread</button>
                     </div>
                 </section>

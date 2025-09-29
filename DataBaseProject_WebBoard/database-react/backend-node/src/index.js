@@ -15,6 +15,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 
 const authRoutes = require('./routes/auth');
+const authResetRoutes = require('./routes/auth-reset');
 const usersRoutes = require('./routes/users');
 const threadsRoutes = require('./routes/threads');
 const postsRoutes = require('./routes/posts');
@@ -30,6 +31,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use('/api', authRoutes);
+app.use('/api/auth', authResetRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/threads', threadsRoutes);
 app.use('/api/posts', postsRoutes);

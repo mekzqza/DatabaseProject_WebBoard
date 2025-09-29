@@ -46,6 +46,12 @@ export default function ProfilePopup({ onClose }) {
                                 className="ppop-btn"
                                 onClick={() => { onClose?.(); navigate('/profile/edit'); }}
                             >แก้ไขโปรไฟล์</button>
+                            {user && String(user.role || '').toLowerCase() === 'admin' && (
+                                <button
+                                    className="ppop-btn ppop-admin"
+                                    onClick={() => { onClose?.(); navigate('/admin'); }}
+                                >Admin Panel</button>
+                            )}
                         </div>
                     </div>
                 </div>

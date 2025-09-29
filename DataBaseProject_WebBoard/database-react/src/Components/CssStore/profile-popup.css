@@ -87,6 +87,13 @@
   cursor: pointer;
 }
 
+.ppop-btn.ppop-admin {
+  background: linear-gradient(90deg,#0b1220,#111827);
+  border: 1px solid rgba(99,102,241,0.18);
+  color: #e6eef6;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.06);
+}
+
 .ppop-accounts {
   margin-top: 12px;
   display: flex;

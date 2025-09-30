@@ -64,12 +64,13 @@ async function tryFetch(url, options = {}) {
     }
 }
 
-export async function getThreads(q = null, userId = null) {
+export async function getThreads(q = null, userId = null, categoryId = null) {
     // Call the API endpoint mounted at /api/threads
     const base = `${API_BASE.replace(/\/$/, '')}/api/threads`;
     const params = [];
     if (q && q.toString().trim()) params.push(`q=${encodeURIComponent(q.toString().trim())}`);
     if (userId !== null && userId !== undefined && userId !== '') params.push(`user_id=${encodeURIComponent(userId)}`);
+    if (categoryId !== null && categoryId !== undefined && categoryId !== '') params.push(`category_id=${encodeURIComponent(categoryId)}`);
     const url = params.length ? `${base}?${params.join('&')}` : base;
     return await tryFetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
 }

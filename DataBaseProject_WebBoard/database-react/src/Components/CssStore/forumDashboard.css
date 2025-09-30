@@ -175,6 +175,11 @@
     align-items: center;
 }
 
+.fd-cat-card.fd-cat-active{
+    border: 2px solid rgba(59,130,246,0.18);
+    background: linear-gradient(180deg, rgba(59,130,246,0.04), rgba(255,255,255,0));
+}
+
 .fd-cat-left{
     display: flex;
     gap: 14px;

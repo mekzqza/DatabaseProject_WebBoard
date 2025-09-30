@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import NewThreadModal from "./NewThreadModel";
 import "./CssStore/forumDashboard.css";
 import { useAuth } from './AuthProvider';
@@ -27,6 +27,7 @@ export default function ForumDashboard() {
     const categoriesRef = useRef(categories);
     const [searchQuery, setSearchQuery] = useState('');
     const [recentThreads, setRecentThreads] = useState([]); // newest first
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const [isModalOpen, setModalOpen] = useState(false);
     const { user, token } = useAuth();
     const [showProfile, setShowProfile] = useState(false);
@@ -46,11 +47,11 @@ export default function ForumDashboard() {
     }
 
     // helper: load threads (optionally with search query q)
-    const loadThreads = useCallback(async (q = null) => {
+    const loadThreads = useCallback(async (q = null, categoryId = null) => {
         setLoadingThreads(true);
         setThreadsError('');
         try {
-            const data = await getThreads(q);
+            const data = await getThreads(q, null, categoryId);
             // data expected to be an array of thread rows from backend
             const cats = categoriesRef.current || initialCategories;
             const mapped = (Array.isArray(data) ? data : []).map((t) => {
@@ -85,6 +86,18 @@ export default function ForumDashboard() {
             setLoadingThreads(false);
         }
     }, []);
+
+    // use search params to pick category filter from URL (e.g. ?category=2)
+    const [searchParams, setSearchParams] = useSearchParams();
+    useEffect(() => {
+        const cat = searchParams.get('category');
+        const cid = cat ? Number(cat) : null;
+        setSelectedCategory(cid);
+        // reload threads with the selected category
+        loadThreads(searchQuery, cid);
+    }, [searchParams, loadThreads]);
+
+    const activeCategoryTitle = selectedCategory ? (categories.find(c => c.id === selectedCategory)?.title || '') : '';
 
     // keep categoriesRef up to date to avoid stale closures inside loadThreads
     useEffect(() => { categoriesRef.current = categories; }, [categories]);
@@ -286,8 +299,18 @@ export default function ForumDashboard() {
                 </section>
 
                 <section className="fd-grid">
-                    {categories.map(c => (
-                        <article key={c.id} className="fd-cat-card">
+                    {categories.map(c => {
+                        const isActive = selectedCategory === c.id;
+                        return (
+                        <article key={c.id} className={`fd-cat-card ${isActive ? 'fd-cat-active' : ''}`} onClick={() => {
+                            // set query param ?category=<id>
+                            if (isActive) {
+                                // toggle off -> clear category param
+                                setSearchParams({});
+                            } else {
+                                setSearchParams({ category: String(c.id) });
+                            }
+                        }} style={{ cursor: 'pointer' }}>
                             <div className="fd-cat-left">
                                 <span className="fd-dot" style={{ background: c.dot }} />
                                 <div>
@@ -299,11 +322,12 @@ export default function ForumDashboard() {
                                 <span className="fd-threads-count">{c.threads} threads</span>
                             </div>
                         </article>
-                    ))}
+                        );
+                    })}
                 </section>
 
                 <section className="fd-recent">
-                    <h3>Recent Threads</h3>
+                    <h3>{activeCategoryTitle ? `${activeCategoryTitle} — Recent Threads` : 'Recent Threads'}</h3>
                     {loadingThreads ? (
                         <div>Loading threads...</div>
                     ) : threadsError ? (

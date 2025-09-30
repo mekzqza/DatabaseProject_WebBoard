@@ -76,6 +76,19 @@
     color:#fff;
     border:none;
   }
+  /* Report button - make it more visible */
+  .tv-btn-report{
+    background: var(--danger);
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    box-shadow: 0 6px 14px rgba(239,68,68,0.15);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .tv-btn-report:hover{ transform: translateY(-2px); box-shadow: 0 10px 20px rgba(239,68,68,0.18); }
+  .tv-btn-report:active{ transform: translateY(0); box-shadow: 0 6px 14px rgba(239,68,68,0.15); }
 
   .tv-meta{
     margin-top:14px;

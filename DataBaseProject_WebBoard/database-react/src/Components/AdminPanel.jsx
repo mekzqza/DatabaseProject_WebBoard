@@ -87,7 +87,6 @@ export default function AdminPanel() {
                                                 setUsers(prev => prev.map(x => x.user_id === u.user_id ? { ...x, role: val } : x));
                                             }}>
                                                 <option value="user">user</option>
-                                                <option value="moderator">moderator</option>
                                                 <option value="admin">admin</option>
                                             </select>
                                             <button className="fd-btn" onClick={async () => {

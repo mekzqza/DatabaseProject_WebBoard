@@ -150,7 +150,7 @@ export default function ThreadView() {
                                     </>
                                 )}
                                 {canReport && (
-                                    <button className="tv-btn" onClick={() => { setReportOpen(true); setReportMessage(''); setReportReason(''); }}>Report</button>
+                                    <button className="tv-btn tv-btn-report" onClick={() => { setReportOpen(true); setReportMessage(''); setReportReason(''); }} aria-label="Report thread">Report</button>
                                 )}
                             </div>
                         </header>

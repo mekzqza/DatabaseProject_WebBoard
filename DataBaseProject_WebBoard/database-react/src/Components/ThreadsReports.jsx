@@ -14,6 +14,28 @@ export default function ThreadsReports() {
 
   const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 
+  // small helper to format timestamps returned from API
+  function formatTimestamp(raw) {
+    // raw may be: null, ISO string, unix seconds (number), unix ms (number), or undefined
+    if (raw === null || raw === undefined) return '';
+    let ts = raw;
+    // if object with known fields, try to pick common names
+    if (typeof raw === 'object') {
+      ts = raw.reported_at || raw.created_at || raw.createdAt || raw.timestamp || raw.time || raw;
+    }
+    // if numeric and likely seconds (10 digits), convert to ms
+    if (typeof ts === 'number') {
+      if (ts > 0 && ts < 1e11) ts = ts * 1000; // seconds -> ms
+    }
+    try {
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return String(raw);
+      return d.toLocaleString();
+    } catch (e) {
+      return String(raw);
+    }
+  }
+
   // derive role (from auth provider or localStorage fallback)
   const derivedRole = (user && user.role) || (() => {
     try {
@@ -132,14 +154,14 @@ export default function ThreadsReports() {
     <div style={{ padding: 24 }}>
       <h2>Thread Reports (Admin)</h2>
       {/* Debug summary (temporary) */}
-      <div style={{ marginBottom: 12, padding: 10, borderRadius: 6, background: '#071328', color: '#e6f0ff', border: '1px solid rgba(255,255,255,0.04)' }}>
+  <div style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: '#fff', color: '#071328', border: '1px solid rgba(2,6,23,0.06)', boxShadow: '0 6px 18px rgba(2,6,23,0.04)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
             <strong style={{ display: 'block', marginBottom: 8 }}>Debug (temporary)</strong>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ minWidth: 220 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{user ? (user.username || user.email || ('#' + user.user_id)) : '—'}</div>
-                <div style={{ marginTop: 4, color: '#9fb', fontSize: 13 }}>{user && user.email ? user.email : ''}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#071328' }}>{user ? (user.username || user.email || ('#' + user.user_id)) : '—'}</div>
+                <div style={{ marginTop: 4, color: '#446', fontSize: 13 }}>{user && user.email ? user.email : ''}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div>Role: <strong style={{ color: '#9fe' }}>{String(derivedRole)}</strong></div>
@@ -194,20 +216,20 @@ export default function ThreadsReports() {
               </thead>
               <tbody>
                 {reports.map(r => (
-                  <tr key={r.report_id} style={{ borderTop: '1px solid #eee' }}>
-                    <td style={{ padding: 8 }}>{r.report_id}</td>
-                    <td style={{ padding: 8 }}>
-                      <div style={{ fontWeight: 600 }}>{r.thread_title || `#${r.thread_id}`}</div>
-                      <div style={{ color: '#666' }}>id: {r.thread_id} • by: {r.thread_author_username || 'unknown'}</div>
+                  <tr key={r.report_id} style={{ borderTop: '1px solid #eee', background: '#ffffff', color: '#071328' }}>
+                    <td style={{ padding: 12, verticalAlign: 'top', width: 60 }}>{r.report_id}</td>
+                    <td style={{ padding: 12 }}>
+                      <div style={{ fontWeight: 700, color: '#071328' }}>{r.thread_title || `#${r.thread_id}`}</div>
+                      <div style={{ color: '#666', marginTop: 6 }}>id: {r.thread_id} • by: {r.thread_author_username || 'unknown'}</div>
                       {r.thread_content && (
-                        <div style={{ marginTop: 6, color: '#444', maxWidth: 600, whiteSpace: 'pre-wrap' }}>{String(r.thread_content).slice(0, 240)}{String(r.thread_content).length > 240 ? '…' : ''}</div>
+                        <div style={{ marginTop: 8, color: '#444', maxWidth: 800, whiteSpace: 'pre-wrap' }}>{String(r.thread_content).slice(0, 240)}{String(r.thread_content).length > 240 ? '…' : ''}</div>
                       )}
                     </td>
-                    <td style={{ padding: 8 }}>{r.reporter_username || r.user_id}</td>
-                    <td style={{ padding: 8, maxWidth: 400, whiteSpace: 'pre-wrap' }}>{r.reason}</td>
-                    <td style={{ padding: 8 }}>{r.status}</td>
-                    <td style={{ padding: 8 }}>{r.created_at}</td>
-                    <td style={{ padding: 8 }}>
+                    <td style={{ padding: 12, verticalAlign: 'top' }}>{r.reporter_username || r.user_id}</td>
+                    <td style={{ padding: 12, maxWidth: 400, whiteSpace: 'pre-wrap', verticalAlign: 'top' }}>{r.reason}</td>
+                    <td style={{ padding: 12, verticalAlign: 'top' }}>{r.status}</td>
+                    <td style={{ padding: 12, verticalAlign: 'top' }} title={r.report_created_at || r.created_at}>{formatTimestamp(r.report_created_at || r.created_at)}</td>
+                    <td style={{ padding: 12, verticalAlign: 'top' }}>
                       <button onClick={() => navigate(`/thread/${r.thread_id}`)} style={{ marginRight: 8 }}>View</button>
                       {r.status !== 'resolved' && <button onClick={() => updateStatus(r.report_id, 'resolved')}>Resolve</button>}
                       {r.status !== 'reviewed' && <button onClick={() => updateStatus(r.report_id, 'reviewed')} style={{ marginLeft: 8 }}>Mark Reviewed</button>}

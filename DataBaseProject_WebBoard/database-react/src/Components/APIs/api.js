@@ -189,7 +189,8 @@ export async function createUser(user) {
 // Request body: { email: string }
 export async function sendForgotPassword({ email }) {
     if (!email || !email.toString().trim()) throw new Error('email is required');
-    const url = `${API_BASE}/api/auth/forgot-password`;
+    // backend route that creates reset token and sends the reset email
+    const url = `${API_BASE}/api/auth/request-reset`;
     const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -197,6 +198,19 @@ export async function sendForgotPassword({ email }) {
             'Accept': 'application/json',
         },
         body: JSON.stringify({ email }),
+    });
+    return await handleResponse(res);
+}
+
+// API: reset password using token
+// body: { user_id, token, newPassword }
+export async function sendResetPassword(body) {
+    if (!body || !body.user_id || !body.token || !body.newPassword) throw new Error('user_id, token and newPassword are required');
+    const url = `${API_BASE}/api/auth/reset-password`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(body),
     });
     return await handleResponse(res);
 }

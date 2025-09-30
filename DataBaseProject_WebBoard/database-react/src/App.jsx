@@ -9,6 +9,7 @@ import SignUpPage from './Components/SignUpPage';
 import Profile from './Components/Profile';
 import EditProfile from './Components/EditProfile';
 import ForgotPassword from './Components/ForgotPassword';
+import ResetPassword from './Components/ResetPassword';
 import ThreadView from './Components/ThreadView';
 import ThreadsReports from './Components/ThreadsReports';
 import AdminPanel from './Components/AdminPanel';
@@ -22,6 +23,7 @@ export default function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
                     <Route path="/forgotpassword" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
                     <Route path="/thread/:id" element={<ThreadView />} />
